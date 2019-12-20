@@ -21,7 +21,7 @@ def submit(node):
 
     # base_command = ["C:/Houdini17/bin/hython.exe", "C:/Houdini17/bin/hrender.py", file_path, "-d", output_driver]
 
-    job = author.Job(title=job_name, priority=100, service="room_111")
+    job = author.Job(title=job_name, priority=100, service="loree")
 
 
     ##### DIR MAP MARVIN #####
@@ -73,7 +73,7 @@ def submit(node):
         task_command.extend(["-e", "-f", str(i), str(i+frames_per_task-1)])
         task_name = "frame {start}-{end}".format(start=str(i), end=str(i+frames_per_task-1))
         #print(task_command)
-        task = author.Task(title=task_name, argv=task_command, service="room_111")
+        task = author.Task(title=task_name, argv=task_command, service="loree")
         job.addChild(task)
 
     #print(job.asTcl())
