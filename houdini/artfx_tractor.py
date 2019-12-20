@@ -40,6 +40,7 @@ def submit(node):
 
     ##### DIR MAP ANA #####
     job.newDirMap(src="I:/SynologyDrive/BREACH", dst="//ana/PFE_RN_2020/BREACH", zone="UNC")
+    job.newDirMap(src="i:/synologydrive/BREACH", dst="//ana/PFE_RN_2020/BREACH", zone="UNC")
     job.newDirMap(src="I:/SynologyDrive/HARU", dst="//ana/PFE_RN_2020/HARU", zone="UNC")
     job.newDirMap(src="I:/SynologyDrive/VERLAN", dst="//ana/PFE_RN_2020/VERLAN", zone="UNC")
 
