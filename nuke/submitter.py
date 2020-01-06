@@ -3,7 +3,7 @@ import os
 from Qt import QtCompat, __binding__, QtCore, QtGui
 from Qt import QtWidgets
 
-import maya.cmds as cmds
+import nuke
 
 mainPath = os.path.dirname(__file__)
 ui_path = os.path.join(mainPath, 'qt', 'submitter.ui')
@@ -17,10 +17,10 @@ for path in paths:
 import tractor.api.author as author
 
 
-class SubmitterMaya(QtWidgets.QMainWindow):
+class SubmitterNuke(QtWidgets.QMainWindow):
 
     def __init__(self):
-        super(SubmitterMaya, self).__init__()
+        super(SubmitterNuke, self).__init__()
         # setup ui
         QtCompat.loadUi(ui_path, self)
         self.bt_render.clicked.connect(self.submit)
@@ -47,16 +47,10 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         increment = int(self.input_frame_increment.text())
         frames_per_task = int(self.input_frame_per_task.text())
 
-        file_path = cmds.file(query=True, sceneName=True)
-        print("File path : " + file_path)
+        file_path = nuke.root().knob('name').value()
+        print(file_path)
 
         job = author.Job(title=job_name, priority=100, service="s111")
-
-        job.newDirMap(src="I:/SynologyDrive/A_PIPE",
-                      dst="//marvin/PFE_RN_2020/A_PIPE", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/A_PIPE",
-                      dst="//marvin/PFE_RN_2020/A_PIPE", zone="UNC")
-
         ##### DIR MAP MARVIN #####
         job.newDirMap(src="I:/SynologyDrive/ARAL",
                       dst="//marvin/PFE_RN_2020/ARAL", zone="UNC")
@@ -127,12 +121,11 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         # job.newDirMap(src="I:/SynologyDrive", dst="//marvin/PFE_RN_2020", zone="NFS")
         # print 'range', range(start, end, frames_per_task)
         for i in range(start, end, frames_per_task):
-            task_command = [
-                "C:/Maya2019/bin/Render.exe -r sw -s {start} -e {end} {file_path}".format(file_path=file_path, start=str(i), end=str(i + frames_per_task - 1))]
+            task_command = ["C:/Maya2019/bin/Render.exe -r sw",
+                            "%D({file_path})".format(file_path=file_path), "-d"]
 
-            # if frames_per_task > (end - start):
-            #    frames_per_task = (end - start)
-
+            task_command.extend(
+                ["-e", "-f", str(i), str(i + frames_per_task - 1)])
             task_name = "frame {start}-{end}".format(
                 start=str(i), end=str(i + frames_per_task - 1))
 
@@ -146,5 +139,5 @@ class SubmitterMaya(QtWidgets.QMainWindow):
 
 if __name__ == '__main__':
 
-    sub = SubmitterMaya()
+    sub = SubmitterNuke()
     sub.show()
