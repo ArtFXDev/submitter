@@ -16,6 +16,11 @@ for path in paths:
 
 import tractor.api.author as author
 
+rams = ["All ram", "ram_32", "ram_lower"]
+projects = ["aral", "ascend", "breach", "clair_de_lune", "fyp", "haru", "issen_sama",
+            "lone", "loree", "moon_keeper", "resurgence", "times_down", "verlan"]
+salles = ["s104", "s110", "s111", "s201", "s202", "s211", "s212", "s213"]
+
 
 class SubmitterNuke(QtWidgets.QMainWindow):
 
@@ -31,6 +36,12 @@ class SubmitterNuke(QtWidgets.QMainWindow):
         self.input_frame_increment.setText('1')
         self.input_frame_start.setText('1')
         self.input_frame_end.setText('2')
+        for project in projects:
+            self.list_project.addItem(project)
+        for salle in salles:
+            self.list_salle.addItem(salle)
+        for ram in rams:
+            self.cb_ram.addItem(ram)
 
     def toggle(self):
         if self.rb_frame_range.isChecked():
@@ -42,15 +53,46 @@ class SubmitterNuke(QtWidgets.QMainWindow):
 
     def submit(self):
         job_name = str(self.input_job_name.text())
-        start = int(self.input_frame_start.text())
-        end = int(self.input_frame_end.text())
         increment = int(self.input_frame_increment.text())
         frames_per_task = int(self.input_frame_per_task.text())
+        salles_selected = []
+        projects_selected = []
+        ram_selected = self.cb_ram.currentText()
+
+        for select in self.list_salle.selectedItems():
+            salles_selected.append(select.text())
+        for project in self.list_project.selectedItems():
+            projects_selected.append(project.text())
+        if self.rb_frame.isChecked():
+            start = int(nuke.frame())
+            end = int(nuke.frame()) + 1
+            frames = str(nuke.frame())
+        else:
+            start = int(self.input_frame_start.text())
+            end = int(self.input_frame_end.text())
+            frames = str(start) + "-" + str(end)
+
+        print("Render Frames : " + frames)
 
         file_path = nuke.root().knob('name').value()
-        print(file_path)
 
-        job = author.Job(title=job_name, priority=100, service="s111")
+        services = str(" || ".join(salles_selected))
+        if ram_selected == "ram_lower":
+            services = "(" + services + ") && !ram_32"
+        elif ram_selected == "ram_32":
+            services = "(" + services + ") && ram_32"
+        if len(projects_selected) != 0:
+            services = "((" + services + ") || (" + \
+                str(' || '.join(projects_selected)) + "))"
+        print("Render on : " + services)
+
+        job = author.Job(title=job_name, priority=100, service=services)
+
+        job.newDirMap(src="I:/SynologyDrive/A_PIPE",
+                      dst="//marvin/PFE_RN_2020/A_PIPE", zone="UNC")
+        job.newDirMap(src="i:/synologydrive/A_PIPE",
+                      dst="//marvin/PFE_RN_2020/A_PIPE", zone="UNC")
+
         ##### DIR MAP MARVIN #####
         job.newDirMap(src="I:/SynologyDrive/ARAL",
                       dst="//marvin/PFE_RN_2020/ARAL", zone="UNC")
@@ -119,18 +161,19 @@ class SubmitterNuke(QtWidgets.QMainWindow):
                       dst="//ana/PFE_RN_2020/VERLAN", zone="UNC")
 
         # job.newDirMap(src="I:/SynologyDrive", dst="//marvin/PFE_RN_2020", zone="NFS")
-        # print 'range', range(start, end, frames_per_task)
         for i in range(start, end, frames_per_task):
-            task_command = ["C:/Maya2019/bin/Render.exe -r sw",
-                            "%D({file_path})".format(file_path=file_path), "-d"]
+            file_path_start = file_path.split('03_WORK_PIPE')[0]  # Marvin
+            i_path_start = "I:/SynologyDrive/" + \
+                file_path_start.split('/')[4] + '/'
 
-            task_command.extend(
-                ["-e", "-f", str(i), str(i + frames_per_task - 1)])
+            task_command = ["C:/Nuke11.3v5/Nuke11.3.exe -x -remap {i_file_path},{file_path_start} -F {frames} %D({file_path})".format(
+                file_path=file_path, frames=str(frames), file_path_start=file_path_start, i_file_path=i_path_start)]
+
             task_name = "frame {start}-{end}".format(
                 start=str(i), end=str(i + frames_per_task - 1))
 
             task = author.Task(
-                title=task_name, argv=task_command, service="s111")
+                title=task_name, argv=task_command, service=services)
             job.addChild(task)
 
         # print(job.asTcl())
