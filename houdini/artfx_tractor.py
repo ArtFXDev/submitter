@@ -156,6 +156,7 @@ def submit(node):
     job.newDirMap(src="i:/synologydrive/CLAIR_DE_LUNE", dst="/marvin/CLAIR_DE_LUNE", zone="NFS")
     job.newDirMap(src="i:/synologydrive/FORGOT_YOUR_PASSWORD", dst="/marvin/FORGOT_YOUR_PASSWORD", zone="NFS")
     job.newDirMap(src="i:/synologydrive/LOREE", dst="/marvin/LOREE", zone="NFS")
+    job.newDirMap(src="i:/synologydrive/LOREE/03_work_pipe/01_asset_3d/05_fxs", dst="/marvin/LOREE/03_WORK_PIPE/01_ASSET_3D/05_FXs", zone="NFS")
     job.newDirMap(src="i:/synologydrive/RESURGENCE", dst="/marvin/RESURGENCE", zone="NFS")
     job.newDirMap(src="i:/synologydrive/TIMES_DOWN", dst="/marvin/TIMES_DOWN", zone="NFS")
 
