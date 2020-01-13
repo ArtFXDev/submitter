@@ -1,5 +1,6 @@
 import hou
 import sys
+import os
 
 paths = ['', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\site-packages\\setuptools-0.6c11-py2.7.egg', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\DLLs\\python27.zip', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\DLLs', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\plat-win', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\lib-tk', 'C:\\Program Files\\Pixar\\Tractor-2.3\\bin', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\site-packages']
 
@@ -9,6 +10,9 @@ for path in paths:
 import tractor.api.author as author
 
 def submit(node):
+
+    file = hou.hipFile.name()
+
     job_name = node.parm("job_name").evalAsString()
     output_driver = node.parm("output_driver").evalAsString()
     start = node.parm("f1").evalAsFloat()
@@ -16,22 +20,17 @@ def submit(node):
     # increment = node.parm("f3").evalAsFloat()
     frames_per_task = node.parm("frames_task").evalAsInt()
     simu = node.parm("simu").evalAsInt()
-    print("simu", simu)
     ram = node.parm("ram").evalAsInt()
-    print("ram", ram)
 
     rooms_bitfield = node.parm("rooms").eval()
     rooms_tokens = node.parm("rooms").parmTemplate().menuItems()
     rooms = [token for n, token in enumerate(rooms_tokens) if rooms_bitfield & (1 << n)]
-    print("rooms", rooms)
 
     teams_bitfield = node.parm("teams").eval()
     teams_tokens = node.parm("teams").parmTemplate().menuItems()
     teams = [token for n, token in enumerate(teams_tokens) if teams_bitfield & (1 << n)]
-    print("teams", teams)
 
-    file_path = hou.hipFile.name()
-    print(file_path)
+    file_path = file
 
     service_rooms = " || ".join(rooms)
     service_teams = " || ".join(teams)
@@ -61,7 +60,73 @@ def submit(node):
         service = "simu"
         author.setEngineClientParam(user="hquser")
 
-    print(service)
+        env_job = hou.getenv('JOB')
+        env_wipcache = hou.getenv('WIPCACHE')
+        env_pubcache = hou.getenv('PUBCACHE')
+        env_asset = hou.getenv('ASSET')
+        env_shot = hou.getenv('SHOT')
+        env_pnum = hou.getenv('PNUM')
+        env_snum = hou.getenv('SNUM')
+        env_asset_name = hou.getenv('ASSET_NAME')
+
+        env_vars = {
+            "JOB": env_job,
+            "WIPCACHE": env_wipcache,
+            "PUBCACHE": env_pubcache,
+            "ASSET": env_asset,
+            "SHOT": env_shot,
+            "PNUM": env_pnum,
+            "SNUM": env_snum,
+            "ASSET_NAME": env_asset_name
+        }
+
+        for key in env_vars:
+            if env_vars[key] != None:
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/A_PIPE", "/marvin/A_PIPE")
+                ##### DIR MAP MARVIN #####
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/ARAL", "/marvin/ARAL")
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/CLAIR_DE_LUNE", "/marvin/CLAIR_DE_LUNE")
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/FORGOT_YOUR_PASSWORD", "/marvin/FORGOT_YOUR_PASSWORD")
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/LOREE", "//marvin/LOREE")
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/RESURGENCE", "//marvin/RESURGENCE")
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/TIMES_DOWN", "//marvin/TIMES_DOWN")
+
+                ##### DIR MAP TARS #####
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/ASCEND", "//tars/ASCEND")
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/ISSEN_SAMA", "//tars/ISSEN_SAMA")
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/LONE", "//tars/LONE")
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/MOON_KEEPER", "//tars/MOON_KEEPER")
+
+                ##### DIR MAP ANA #####
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/BREACH", "//ana/BREACH")
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/HARU", "//ana/HARU")
+                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/VERLAN", "//ana/VERLAN")
+
+
+        file_name = hou.hipFile.basename()
+
+        path_split = file.split("/")
+
+        render_path = '/'.join(path_split[:-2]) + '/render'
+        new_name = "{version}_{file_name}".format(version=path_split[-2], file_name=file_name)
+        path = os.path.join(render_path, new_name)
+        new_name_path = path.replace(os.sep, '/')
+
+
+        if not os.path.exists(render_path):
+            os.mkdir(render_path)
+
+        hou.hipFile.setName(new_name_path)
+
+        file_path = new_name_path
+
+        for key in env_vars:
+            if env_vars[key] != None:
+                hou.putenv(key, env_vars[key])
+
+        hou.hipFile.save(file_name=None)
+
+
 
 
     # base_command = ["C:/Houdini17/bin/hython.exe", "C:/Houdini17/bin/hrender.py", file_path, "-d", output_driver]
@@ -156,7 +221,6 @@ def submit(node):
     job.newDirMap(src="i:/synologydrive/CLAIR_DE_LUNE", dst="/marvin/CLAIR_DE_LUNE", zone="NFS")
     job.newDirMap(src="i:/synologydrive/FORGOT_YOUR_PASSWORD", dst="/marvin/FORGOT_YOUR_PASSWORD", zone="NFS")
     job.newDirMap(src="i:/synologydrive/LOREE", dst="/marvin/LOREE", zone="NFS")
-    job.newDirMap(src="i:/synologydrive/LOREE/03_work_pipe/01_asset_3d/05_fxs", dst="/marvin/LOREE/03_WORK_PIPE/01_ASSET_3D/05_FXs", zone="NFS")
     job.newDirMap(src="i:/synologydrive/RESURGENCE", dst="/marvin/RESURGENCE", zone="NFS")
     job.newDirMap(src="i:/synologydrive/TIMES_DOWN", dst="/marvin/TIMES_DOWN", zone="NFS")
 
@@ -182,3 +246,5 @@ def submit(node):
 
     #print(job.asTcl())
     newJid = job.spool()
+
+    hou.hipFile.load(file, suppress_save_prompt=True)
