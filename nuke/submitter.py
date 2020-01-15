@@ -2,6 +2,7 @@ import sys
 import os
 from Qt import QtCompat, __binding__, QtCore, QtGui
 from Qt import QtWidgets
+from Qt.QtWidgets import QMessageBox
 
 import nuke
 
@@ -125,59 +126,40 @@ class SubmitterNuke(QtWidgets.QMainWindow):
         job.newDirMap(src="I:/SynologyDrive/VERLAN",
                       dst="//ana/PFE_RN_2020/VERLAN", zone="UNC")
 
-        ########################
-        ##### DIR MAP PIPE #####
-        ########################
-        ##### DIR MAP MARVIN #####
-        job.newDirMap(src="i:/synologydrive/ARAL",
-                      dst="//marvin/PFE_RN_2020/ARAL", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/CLAIR_DE_LUNE",
-                      dst="//marvin/PFE_RN_2020/CLAIR_DE_LUNE", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/FORGOT_YOUR_PASSWORD", dst="//marvin/PFE_RN_2020/FORGOT_YOUR_PASSWORD",
-                      zone="UNC")
-        job.newDirMap(src="i:/synologydrive/LOREE",
-                      dst="//marvin/PFE_RN_2020/LOREE", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/RESURGENCE",
-                      dst="//marvin/PFE_RN_2020/RESURGENCE", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/TIMES_DOWN",
-                      dst="//marvin/PFE_RN_2020/TIMES_DOWN", zone="UNC")
+        try:
+            # job.newDirMap(src="I:/SynologyDrive", dst="//marvin/PFE_RN_2020", zone="NFS")
+            for i in range(start, end, frames_per_task):
+                file_path_start = file_path.split('03_WORK_PIPE')[0]  # Marvin
+                i_path_start = "I:/SynologyDrive/" + \
+                    file_path_start.split('/')[4] + '/'
 
-        ##### DIR MAP TARS #####
-        job.newDirMap(src="i:/synologydrive/ASCEND",
-                      dst="//tars/PFE_RN_2020/ASCEND", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/ISSEN_SAMA",
-                      dst="//tars/PFE_RN_2020/ISSEN_SAMA", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/LONE",
-                      dst="//tars/PFE_RN_2020/LONE", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/MOON_KEEPER",
-                      dst="//tars/PFE_RN_2020/MOON_KEEPER", zone="UNC")
+                task_command = ["C:/Nuke11.3v5/Nuke11.3.exe -x -remap {i_file_path},{file_path_start} -F {frames} %D({file_path})".format(
+                    file_path=file_path, frames=str(frames), file_path_start=file_path_start, i_file_path=i_path_start)]
 
-        ##### DIR MAP ANA #####
-        job.newDirMap(src="i:/synologydrive/BREACH",
-                      dst="//ana/PFE_RN_2020/BREACH", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/HARU",
-                      dst="//ana/PFE_RN_2020/HARU", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/VERLAN",
-                      dst="//ana/PFE_RN_2020/VERLAN", zone="UNC")
+                task_name = "frame {start}-{end}".format(
+                    start=str(i), end=str(i + frames_per_task - 1))
 
-        # job.newDirMap(src="I:/SynologyDrive", dst="//marvin/PFE_RN_2020", zone="NFS")
-        for i in range(start, end, frames_per_task):
-            file_path_start = file_path.split('03_WORK_PIPE')[0]  # Marvin
-            i_path_start = "I:/SynologyDrive/" + \
-                file_path_start.split('/')[4] + '/'
+                task = author.Task(
+                    title=task_name, argv=task_command, service=services)
+                job.addChild(task)
 
-            task_command = ["C:/Nuke11.3v5/Nuke11.3.exe -x -remap {i_file_path},{file_path_start} -F {frames} %D({file_path})".format(
-                file_path=file_path, frames=str(frames), file_path_start=file_path_start, i_file_path=i_path_start)]
-
-            task_name = "frame {start}-{end}".format(
-                start=str(i), end=str(i + frames_per_task - 1))
-
-            task = author.Task(
-                title=task_name, argv=task_command, service=services)
-            job.addChild(task)
-
-        # print(job.asTcl())
-        newJid = job.spool()
+            # print(job.asTcl())
+            newJid = job.spool()
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("Job Send !")
+            msg.setWindowTitle("RenderFarm")
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.buttonClicked.connect(self.close)
+            msg.exec_()
+        except Exception as ex:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText(ex.message)
+            msg.setWindowTitle("RenderFarm")
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.buttonClicked.connect(self.close)
+            msg.exec_()
 
 
 if __name__ == '__main__':

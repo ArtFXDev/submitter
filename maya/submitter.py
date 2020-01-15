@@ -2,6 +2,7 @@ import sys
 import os
 from Qt import QtCompat, __binding__, QtCore, QtGui
 from Qt import QtWidgets
+from Qt.QtWidgets import QMessageBox
 
 import maya.cmds as cmds
 
@@ -125,56 +126,37 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         job.newDirMap(src="I:/SynologyDrive/VERLAN",
                       dst="//ana/PFE_RN_2020/VERLAN", zone="UNC")
 
-        ########################
-        ##### DIR MAP PIPE #####
-        ########################
-        ##### DIR MAP MARVIN #####
-        job.newDirMap(src="i:/synologydrive/ARAL",
-                      dst="//marvin/PFE_RN_2020/ARAL", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/CLAIR_DE_LUNE",
-                      dst="//marvin/PFE_RN_2020/CLAIR_DE_LUNE", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/FORGOT_YOUR_PASSWORD", dst="//marvin/PFE_RN_2020/FORGOT_YOUR_PASSWORD",
-                      zone="UNC")
-        job.newDirMap(src="i:/synologydrive/LOREE",
-                      dst="//marvin/PFE_RN_2020/LOREE", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/RESURGENCE",
-                      dst="//marvin/PFE_RN_2020/RESURGENCE", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/TIMES_DOWN",
-                      dst="//marvin/PFE_RN_2020/TIMES_DOWN", zone="UNC")
-
-        ##### DIR MAP TARS #####
-        job.newDirMap(src="i:/synologydrive/ASCEND",
-                      dst="//tars/PFE_RN_2020/ASCEND", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/ISSEN_SAMA",
-                      dst="//tars/PFE_RN_2020/ISSEN_SAMA", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/LONE",
-                      dst="//tars/PFE_RN_2020/LONE", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/MOON_KEEPER",
-                      dst="//tars/PFE_RN_2020/MOON_KEEPER", zone="UNC")
-
-        ##### DIR MAP ANA #####
-        job.newDirMap(src="i:/synologydrive/BREACH",
-                      dst="//ana/PFE_RN_2020/BREACH", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/HARU",
-                      dst="//ana/PFE_RN_2020/HARU", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/VERLAN",
-                      dst="//ana/PFE_RN_2020/VERLAN", zone="UNC")
-
         # job.newDirMap(src="I:/SynologyDrive", dst="//marvin/PFE_RN_2020", zone="NFS")
         # print 'range', range(start, end, frames_per_task)
-        for i in range(start, end, frames_per_task):
-            task_command = [
-                "C:/Maya2019/bin/Render.exe -r sw -s {start} -e {end} %D({file_path})".format(file_path=file_path, start=str(start), end=str(end))]
+        try:
+            for i in range(start, end, frames_per_task):
+                task_command = [
+                    "C:/Maya2019/bin/Render.exe -r sw -s {start} -e {end} %D({file_path})".format(file_path=file_path, start=str(start), end=str(end))]
 
-            task_name = "frame {start}-{end}".format(
-                start=str(i), end=str(i + frames_per_task - 1))
+                task_name = "frame {start}-{end}".format(
+                    start=str(i), end=str(i + frames_per_task - 1))
 
-            task = author.Task(
-                title=task_name, argv=task_command, service=services)
-            job.addChild(task)
+                task = author.Task(
+                    title=task_name, argv=task_command, service=services)
+                job.addChild(task)
 
-        # print(job.asTcl())
-        newJid = job.spool()
+            # print(job.asTcl())
+            newJid = job.spool()
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("Job Send !")
+            msg.setWindowTitle("RenderFarm")
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.buttonClicked.connect(self.close)
+            msg.exec_()
+        except Exception as ex:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText(ex.message)
+            msg.setWindowTitle("RenderFarm")
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.buttonClicked.connect(self.close)
+            msg.exec_()
 
 
 if __name__ == '__main__':
