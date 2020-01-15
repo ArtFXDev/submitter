@@ -1,0 +1,3 @@
+import submitter as sub
+win = sub.SubmitterNuke()
+win.show()
