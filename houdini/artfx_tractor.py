@@ -66,7 +66,7 @@ def submit(node):
         env_pnum = hou.getenv('PNUM')
         env_snum = hou.getenv('SNUM')
         env_asset_name = hou.getenv('ASSET_NAME')
-        env_project = hou.getenv('PROJ')
+        env_project = hou.getenv('PROJECT')
 
         env_vars = {
             "JOB": env_job,
@@ -77,7 +77,7 @@ def submit(node):
             "PNUM": env_pnum,
             "SNUM": env_snum,
             "ASSET_NAME": env_asset_name,
-            "PROJ": env_project
+            "PROJECT": env_project
         }
 
         for key in env_vars:
@@ -140,7 +140,7 @@ def submit(node):
         env_pnum = hou.getenv('PNUM')
         env_snum = hou.getenv('SNUM')
         env_asset_name = hou.getenv('ASSET_NAME')
-        env_project = hou.getenv('PROJ')
+        env_project = hou.getenv('PROJECT')
 
         env_vars = {
             "JOB": env_job,
@@ -151,7 +151,7 @@ def submit(node):
             "PNUM": env_pnum,
             "SNUM": env_snum,
             "ASSET_NAME": env_asset_name,
-            "PROJ": env_project
+            "PROJECT": env_project
         }
 
         for key in env_vars:
