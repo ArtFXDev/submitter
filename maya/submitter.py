@@ -59,7 +59,9 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         salles_selected = []
         projects_selected = []
         ram_selected = self.cb_ram.currentText()
-
+        proj = cmds.file(query=True, sceneName=True).replace(
+            os.sep, '/').split('/scenes')[0]
+        print 'Project : ', proj
         for select in self.list_salle.selectedItems():
             salles_selected.append(select.text())
         for project in self.list_project.selectedItems():
@@ -131,7 +133,9 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         try:
             for i in range(start, end, frames_per_task):
                 task_command = [
-                    "C:/Maya2019/bin/Render.exe -r sw -s {start} -e {end} %D({file_path})".format(file_path=file_path, start=str(start), end=str(end))]
+                    "C:/Maya2019/bin/Render.exe", "-r", "sw", "-s", "{start}".format(
+                        start=str(start)), "-e", "{end}".format(end=str(end)),
+                    "-proj", "%D({proj})".format(proj=proj), "%D({file_path})".format(file_path=file_path)]
 
                 task_name = "frame {start}-{end}".format(
                     start=str(i), end=str(i + frames_per_task - 1))
