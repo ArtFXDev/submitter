@@ -59,48 +59,27 @@ def submit(node):
                 service = '{teams}'.format(rooms=service_rooms, teams=service_teams)
 
         env_job = hou.getenv('JOB')
-        env_wipcache = hou.getenv('WIPCACHE')
-        env_pubcache = hou.getenv('PUBCACHE')
-        env_asset = hou.getenv('ASSET')
-        env_shot = hou.getenv('SHOT')
-        env_pnum = hou.getenv('PNUM')
-        env_snum = hou.getenv('SNUM')
-        env_asset_name = hou.getenv('ASSET_NAME')
-        env_project = hou.getenv('PROJECT')
 
-        env_vars = {
-            "JOB": env_job,
-            "WIPCACHE": env_wipcache,
-            "PUBCACHE": env_pubcache,
-            "ASSET": env_asset,
-            "SHOT": env_shot,
-            "PNUM": env_pnum,
-            "SNUM": env_snum,
-            "ASSET_NAME": env_asset_name,
-            "PROJECT": env_project
-        }
+        if env_job != None:
+            env_job = env_job.replace("I:/SynologyDrive/A_PIPE", "/marvin/A_PIPE")
+            ##### DIR MAP MARVIN #####
+            env_job = env_job.replace("I:/SynologyDrive/ARAL", "/marvin/ARAL")
+            env_job = env_job.replace("I:/SynologyDrive/CLAIR_DE_LUNE", "/marvin/CLAIR_DE_LUNE")
+            env_job = env_job.replace("I:/SynologyDrive/FORGOT_YOUR_PASSWORD", "/marvin/FORGOT_YOUR_PASSWORD")
+            env_job = env_job.replace("I:/SynologyDrive/LOREE", "/marvin/LOREE")
+            env_job = env_job.replace("I:/SynologyDrive/RESURGENCE", "/marvin/RESURGENCE")
+            env_job = env_job.replace("I:/SynologyDrive/TIMES_DOWN", "/marvin/TIMES_DOWN")
 
-        for key in env_vars:
-            if env_vars[key] != None:
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/A_PIPE", "//marvin/PFE_RN_2020/A_PIPE")
-                ##### DIR MAP MARVIN #####
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/ARAL", "//marvin/PFE_RN_2020/ARAL")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/CLAIR_DE_LUNE", "//marvin/PFE_RN_2020/CLAIR_DE_LUNE")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/FORGOT_YOUR_PASSWORD", "//marvin/PFE_RN_2020/FORGOT_YOUR_PASSWORD")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/LOREE", "//marvin/PFE_RN_2020/LOREE")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/RESURGENCE", "//marvin/PFE_RN_2020/RESURGENCE")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/TIMES_DOWN", "//marvin/PFE_RN_2020/TIMES_DOWN")
+            ##### DIR MAP TARS #####
+            env_job = env_job.replace("I:/SynologyDrive/ASCEND", "/tars/ASCEND")
+            env_job = env_job.replace("I:/SynologyDrive/ISSEN_SAMA", "/tars/ISSEN_SAMA")
+            env_job = env_job.replace("I:/SynologyDrive/LONE", "/tars/LONE")
+            env_job = env_job.replace("I:/SynologyDrive/MOON_KEEPER", "/tars/MOON_KEEPER")
 
-                ##### DIR MAP TARS #####
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/ASCEND", "//tars/PFE_RN_2020/ASCEND")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/ISSEN_SAMA", "//tars/PFE_RN_2020/ISSEN_SAMA")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/LONE", "//tars/PFE_RN_2020/LONE")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/MOON_KEEPER", "//tars/PFE_RN_2020/MOON_KEEPER")
-
-                ##### DIR MAP ANA #####
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/BREACH", "//ana/PFE_RN_2020/BREACH")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/HARU", "//ana/PFE_RN_2020/HARU")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/VERLAN", "//ana/PFE_RN_2020/VERLAN")
+            ##### DIR MAP ANA #####
+            env_job = env_job.replace("I:/SynologyDrive/BREACH", "/ana/BREACH")
+            env_job = env_job.replace("I:/SynologyDrive/HARU", "/ana/HARU")
+            env_job = env_job.replace("I:/SynologyDrive/VERLAN", "/ana/VERLAN")
 
 
         print(env_vars)
@@ -124,9 +103,28 @@ def submit(node):
 
         file_path = new_name_path
 
-        for key in env_vars:
-            if env_vars[key] != None:
-                hou.putenv(key, env_vars[key])
+        if env_job != None:
+            hou.putenv("JOB", env_job)
+
+        hou.hscript("opchange I:/SynologyDrive/A_PIPE //marvin/PFE_RN_2020/A_PIPE")
+        ##### DIR MAP MARVIN #####
+        hou.hscript("opchange I:/SynologyDrive/ARAL //marvin/PFE_RN_2020/ARAL")
+        hou.hscript("opchange I:/SynologyDrive/CLAIR_DE_LUNE //marvin/PFE_RN_2020/CLAIR_DE_LUNE")
+        hou.hscript("opchange I:/SynologyDrive/FORGOT_YOUR_PASSWORD //marvin/PFE_RN_2020/FORGOT_YOUR_PASSWORD")
+        hou.hscript("opchange I:/SynologyDrive/LOREE //marvin/PFE_RN_2020/LOREE")
+        hou.hscript("opchange I:/SynologyDrive/RESURGENCE //marvin/PFE_RN_2020/RESURGENCE")
+        hou.hscript("opchange I:/SynologyDrive/TIMES_DOWN //marvin/PFE_RN_2020/TIMES_DOWN")
+
+        ##### DIR MAP TARS #####
+        hou.hscript("opchange I:/SynologyDrive/ASCEND //tars/PFE_RN_2020/ASCEND")
+        hou.hscript("opchange I:/SynologyDrive/ISSEN_SAMA //tars/PFE_RN_2020/ISSEN_SAMA")
+        hou.hscript("opchange I:/SynologyDrive/LONE //tars/PFE_RN_2020/LONE")
+        hou.hscript("opchange I:/SynologyDrive/MOON_KEEPER //tars/PFE_RN_2020/MOON_KEEPER")
+
+        ##### DIR MAP ANA #####
+        hou.hscript("opchange I:/SynologyDrive/BREACH //ana/PFE_RN_2020/BREACH")
+        hou.hscript("opchange I:/SynologyDrive/HARU //ana/PFE_RN_2020/HARU")
+        hou.hscript("opchange I:/SynologyDrive/VERLAN //ana/PFE_RN_2020/VERLAN")
 
         hou.hipFile.save(file_name=None)
     else:
@@ -134,48 +132,27 @@ def submit(node):
         author.setEngineClientParam(user="hquser")
 
         env_job = hou.getenv('JOB')
-        env_wipcache = hou.getenv('WIPCACHE')
-        env_pubcache = hou.getenv('PUBCACHE')
-        env_asset = hou.getenv('ASSET')
-        env_shot = hou.getenv('SHOT')
-        env_pnum = hou.getenv('PNUM')
-        env_snum = hou.getenv('SNUM')
-        env_asset_name = hou.getenv('ASSET_NAME')
-        env_project = hou.getenv('PROJECT')
 
-        env_vars = {
-            "JOB": env_job,
-            "WIPCACHE": env_wipcache,
-            "PUBCACHE": env_pubcache,
-            "ASSET": env_asset,
-            "SHOT": env_shot,
-            "PNUM": env_pnum,
-            "SNUM": env_snum,
-            "ASSET_NAME": env_asset_name,
-            "PROJECT": env_project
-        }
+        if env_job != None:
+            env_job = env_job.replace("I:/SynologyDrive/A_PIPE", "/marvin/A_PIPE")
+            ##### DIR MAP MARVIN #####
+            env_job = env_job.replace("I:/SynologyDrive/ARAL", "/marvin/ARAL")
+            env_job = env_job.replace("I:/SynologyDrive/CLAIR_DE_LUNE", "/marvin/CLAIR_DE_LUNE")
+            env_job = env_job.replace("I:/SynologyDrive/FORGOT_YOUR_PASSWORD", "/marvin/FORGOT_YOUR_PASSWORD")
+            env_job = env_job.replace("I:/SynologyDrive/LOREE", "/marvin/LOREE")
+            env_job = env_job.replace("I:/SynologyDrive/RESURGENCE", "/marvin/RESURGENCE")
+            env_job = env_job.replace("I:/SynologyDrive/TIMES_DOWN", "/marvin/TIMES_DOWN")
 
-        for key in env_vars:
-            if env_vars[key] != None:
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/A_PIPE", "/marvin/A_PIPE")
-                ##### DIR MAP MARVIN #####
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/ARAL", "/marvin/ARAL")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/CLAIR_DE_LUNE", "/marvin/CLAIR_DE_LUNE")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/FORGOT_YOUR_PASSWORD", "/marvin/FORGOT_YOUR_PASSWORD")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/LOREE", "/marvin/LOREE")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/RESURGENCE", "/marvin/RESURGENCE")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/TIMES_DOWN", "/marvin/TIMES_DOWN")
+            ##### DIR MAP TARS #####
+            env_job = env_job.replace("I:/SynologyDrive/ASCEND", "/tars/ASCEND")
+            env_job = env_job.replace("I:/SynologyDrive/ISSEN_SAMA", "/tars/ISSEN_SAMA")
+            env_job = env_job.replace("I:/SynologyDrive/LONE", "/tars/LONE")
+            env_job = env_job.replace("I:/SynologyDrive/MOON_KEEPER", "/tars/MOON_KEEPER")
 
-                ##### DIR MAP TARS #####
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/ASCEND", "/tars/ASCEND")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/ISSEN_SAMA", "/tars/ISSEN_SAMA")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/LONE", "/tars/LONE")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/MOON_KEEPER", "/tars/MOON_KEEPER")
-
-                ##### DIR MAP ANA #####
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/BREACH", "/ana/BREACH")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/HARU", "/ana/HARU")
-                env_vars[key] = env_vars[key].replace("I:/SynologyDrive/VERLAN", "/ana/VERLAN")
+            ##### DIR MAP ANA #####
+            env_job = env_job.replace("I:/SynologyDrive/BREACH", "/ana/BREACH")
+            env_job = env_job.replace("I:/SynologyDrive/HARU", "/ana/HARU")
+            env_job = env_job.replace("I:/SynologyDrive/VERLAN", "/ana/VERLAN")
 
 
         file_name = hou.hipFile.basename()
@@ -198,16 +175,31 @@ def submit(node):
 
         file_path = new_name_path
 
-        for key in env_vars:
-            if env_vars[key] != None:
-                hou.putenv(key, env_vars[key])
+        if env_job != None:
+            hou.putenv("JOB", env_job)
+
+        hou.hscript("opchange I:/SynologyDrive/A_PIPE /marvin/A_PIPE")
+        ##### DIR MAP MARVIN #####
+        hou.hscript("opchange I:/SynologyDrive/ARAL /marvin/ARAL")
+        hou.hscript("opchange I:/SynologyDrive/CLAIR_DE_LUNE /marvin/CLAIR_DE_LUNE")
+        hou.hscript("opchange I:/SynologyDrive/FORGOT_YOUR_PASSWORD /marvin/FORGOT_YOUR_PASSWORD")
+        hou.hscript("opchange I:/SynologyDrive/LOREE /marvin/LOREE")
+        hou.hscript("opchange I:/SynologyDrive/RESURGENCE /marvin/RESURGENCE")
+        hou.hscript("opchange I:/SynologyDrive/TIMES_DOWN /marvin/TIMES_DOWN")
+
+        ##### DIR MAP TARS #####
+        hou.hscript("opchange I:/SynologyDrive/ASCEND /tars/ASCEND")
+        hou.hscript("opchange I:/SynologyDrive/ISSEN_SAMA /tars/ISSEN_SAMA")
+        hou.hscript("opchange I:/SynologyDrive/LONE /tars/LONE")
+        hou.hscript("opchange I:/SynologyDrive/MOON_KEEPER /tars/MOON_KEEPER")
+
+        ##### DIR MAP ANA #####
+        hou.hscript("opchange I:/SynologyDrive/BREACH /ana/BREACH")
+        hou.hscript("opchange I:/SynologyDrive/HARU /ana/HARU")
+        hou.hscript("opchange I:/SynologyDrive/VERLAN /ana/VERLAN")
 
         hou.hipFile.save(file_name=None)
 
-
-
-
-    # base_command = ["C:/Houdini17/bin/hython.exe", "C:/Houdini17/bin/hrender.py", file_path, "-d", output_driver]
 
     job = author.Job(title=job_name, priority=100, service=str(service))
 

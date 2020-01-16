@@ -1,0 +1,28 @@
+#! C:/Nuke11.3v5/nuke-11.3.5.dll -nx
+version 11.3 v5
+Gizmo {
+ label "Tractor Submitter"
+ lock_connections {{curve x1 0 x9 0}}
+ addUserKnob {20 User}
+ addUserKnob {1 job_name l "Job Name" t test}
+ job_name test
+ addUserKnob {26 frame_txt l Frame}
+ addUserKnob {3 frame_first l First}
+ frame_first {{curve x1 1 x9 1}}
+ addUserKnob {3 last_frame l Last -STARTLINE}
+ last_frame {{curve x1 11 x9 11}}
+ addUserKnob {3 Increment l increment -STARTLINE}
+ Increment {{curve x1 0 x9 0}}
+ addUserKnob {22 RENDER l render T "print(\"ok\")\nn = nuke.selectedNodes()\nprint("t")\n\n#####renderfarm part#####\npaths = \['', 'C:\\\\Program Files\\\\Pixar\\\\Tractor-2.3\\\\lib\\\\python2.7\\\\lib\\\\site-packages\\\\setuptools-0.6c11-py2.7.egg', 'C:\\\\Program Files\\\\Pixar\\\\Tractor-2.3\\\\lib\\\\python2.7\\\\DLLs\\\\python27.zip', 'C:\\\\Program Files\\\\Pixar\\\\Tractor-2.3\\\\lib\\\\python2.7\\\\DLLs', 'C:\\\\Program Files\\\\Pixar\\\\Tractor-2.3\\\\lib\\\\python2.7\\\\lib', 'C:\\\\Program Files\\\\Pixar\\\\Tractor-2.3\\\\lib\\\\python2.7\\\\lib\\\\plat-win', 'C:\\\\Program Files\\\\Pixar\\\\Tractor-2.3\\\\lib\\\\python2.7\\\\lib\\\\lib-tk', 'C:\\\\Program Files\\\\Pixar\\\\Tractor-2.3\\\\bin', 'C:\\\\Program Files\\\\Pixar\\\\Tractor-2.3\\\\lib\\\\python2.7', 'C:\\\\Program Files\\\\Pixar\\\\Tractor-2.3\\\\lib\\\\python2.7\\\\lib\\\\site-packages']\nsys.path.extend(paths)\nimport tractor.api.author as author\n\n##a continuer is check code from D:\\Users\\Documents\\Cours\\Pipeline\\Renderfarm\\Tractor-ArtFx\\houdini\n\ndef map_path(job):\n\tjob = author.Job(title=job_name, priority=100, service=\"room_111\")\n\n\n\t##### DIR MAP MARVIN #####\n\tjob.newDirMap(src=\"I:/SynologyDrive/ARAL\", dst=\"//marvin/PFE_RN_2020/ARAL\", zone=\"UNC\")\n\tjob.newDirMap(src=\"I:/SynologyDrive/CLAIR_DE_LUNE\", dst=\"//marvin/PFE_RN_2020/CLAIR_DE_LUNE\", zone=\"UNC\")\n\tjob.newDirMap(src=\"I:/SynologyDrive/FORGOT_YOUR_PASSWORD\", dst=\"//marvin/PFE_RN_2020/FORGOT_YOUR_PASSWORD\", zone=\"UNC\")\n\tjob.newDirMap(src=\"I:/SynologyDrive/LOREE\", dst=\"//marvin/PFE_RN_2020/LOREE\", zone=\"UNC\")\n\tjob.newDirMap(src=\"I:/SynologyDrive/RESURGENCE\", dst=\"//marvin/PFE_RN_2020/RESURGENCE\", zone=\"UNC\")\n\tjob.newDirMap(src=\"I:/SynologyDrive/TIMES_DOWN\", dst=\"//marvin/PFE_RN_2020/TIMES_DOWN\", zone=\"UNC\")\n\n\t##### DIR MAP TARS #####\n\tjob.newDirMap(src=\"I:/SynologyDrive/ASCEND\", dst=\"//tars/PFE_RN_2020/ASCEND\", zone=\"UNC\")\n\tjob.newDirMap(src=\"I:/SynologyDrive/ISSEN_SAMA\", dst=\"//tars/PFE_RN_2020/ISSEN_SAMA\", zone=\"UNC\")\n\tjob.newDirMap(src=\"I:/SynologyDrive/LONE\", dst=\"//tars/PFE_RN_2020/LONE\", zone=\"UNC\")\n\tjob.newDirMap(src=\"I:/SynologyDrive/MOON_KEEPER\", dst=\"//tars/PFE_RN_2020/MOON_KEEPER\", zone=\"UNC\")\n\n\t##### DIR MAP ANA #####\n\tjob.newDirMap(src=\"I:/SynologyDrive/BREACH\", dst=\"//ana/PFE_RN_2020/BREACH\", zone=\"UNC\")\n\tjob.newDirMap(src=\"I:/SynologyDrive/HARU\", dst=\"//ana/PFE_RN_2020/HARU\", zone=\"UNC\")\n\tjob.newDirMap(src=\"I:/SynologyDrive/VERLAN\", dst=\"//ana/PFE_RN_2020/VERLAN\", zone=\"UNC\")\n\n\n\t########################\n\t##### DIR MAP PIPE #####\n\t########################\n\t##### DIR MAP MARVIN #####\n\tjob.newDirMap(src=\"i:/synologydrive/ARAL\", dst=\"//marvin/PFE_RN_2020/ARAL\", zone=\"UNC\")\n\tjob.newDirMap(src=\"i:/synologydrive/CLAIR_DE_LUNE\", dst=\"//marvin/PFE_RN_2020/CLAIR_DE_LUNE\", zone=\"UNC\")\n\tjob.newDirMap(src=\"i:/synologydrive/FORGOT_YOUR_PASSWORD\", dst=\"//marvin/PFE_RN_2020/FORGOT_YOUR_PASSWORD\", zone=\"UNC\")\n\tjob.newDirMap(src=\"i:/synologydrive/LOREE\", dst=\"//marvin/PFE_RN_2020/LOREE\", zone=\"UNC\")\n\tjob.newDirMap(src=\"i:/synologydrive/RESURGENCE\", dst=\"//marvin/PFE_RN_2020/RESURGENCE\", zone=\"UNC\")\n\tjob.newDirMap(src=\"i:/synologydrive/TIMES_DOWN\", dst=\"//marvin/PFE_RN_2020/TIMES_DOWN\", zone=\"UNC\")\n\n\t##### DIR MAP TARS #####\n\tjob.newDirMap(src=\"i:/synologydrive/ASCEND\", dst=\"//tars/PFE_RN_2020/ASCEND\", zone=\"UNC\")\n\tjob.newDirMap(src=\"i:/synologydrive/ISSEN_SAMA\", dst=\"//tars/PFE_RN_2020/ISSEN_SAMA\", zone=\"UNC\")\n\tjob.newDirMap(src=\"i:/synologydrive/LONE\", dst=\"//tars/PFE_RN_2020/LONE\", zone=\"UNC\")\n\tjob.newDirMap(src=\"i:/synologydrive/MOON_KEEPER\", dst=\"//tars/PFE_RN_2020/MOON_KEEPER\", zone=\"UNC\")\n\n\t##### DIR MAP ANA #####\n\tjob.newDirMap(src=\"i:/synologydrive/BREACH\", dst=\"//ana/PFE_RN_2020/BREACH\", zone=\"UNC\")\n\tjob.newDirMap(src=\"i:/synologydrive/HARU\", dst=\"//ana/PFE_RN_2020/HARU\", zone=\"UNC\")\n\tjob.newDirMap(src=\"i:/synologydrive/VERLAN\", dst=\"//ana/PFE_RN_2020/VERLAN\", zone=\"UNC\")\n\n\treturn job\n\n\n" +STARTLINE}
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos 0
+ }
+ Output {
+  name Output1
+  xpos 0
+  ypos 300
+ }
+end_group
