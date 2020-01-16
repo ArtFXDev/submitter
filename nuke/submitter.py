@@ -91,8 +91,6 @@ class SubmitterNuke(QtWidgets.QMainWindow):
 
         job.newDirMap(src="I:/SynologyDrive/A_PIPE",
                       dst="//marvin/PFE_RN_2020/A_PIPE", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/A_PIPE",
-                      dst="//marvin/PFE_RN_2020/A_PIPE", zone="UNC")
 
         ##### DIR MAP MARVIN #####
         job.newDirMap(src="I:/SynologyDrive/ARAL",
@@ -129,12 +127,10 @@ class SubmitterNuke(QtWidgets.QMainWindow):
         try:
             # job.newDirMap(src="I:/SynologyDrive", dst="//marvin/PFE_RN_2020", zone="NFS")
             for i in range(start, end, frames_per_task):
-                file_path_start = file_path.split('03_WORK_PIPE')[0]  # Marvin
-                i_path_start = "I:/SynologyDrive/" + \
-                    file_path_start.split('/')[4] + '/'
-
-                task_command = ["C:/Nuke11.3v5/Nuke11.3.exe -x -remap {i_file_path},{file_path_start} -F {frames} %D({file_path})".format(
-                    file_path=file_path, frames=str(frames), file_path_start=file_path_start, i_file_path=i_path_start)]
+                file_path.replace(os.sep, '/')
+                file_path_start = file_path.split('/03_WORK_PIPE')[0]
+                task_command = ["C:/Nuke11.3v5/Nuke11.3.exe", "-x", "-remap", "{source},%D({target})".format(source=file_path_start, target=file_path_start),
+                                "-F", str(frames), "%D({file_path})".format(file_path=file_path)]
 
                 task_name = "frame {start}-{end}".format(
                     start=str(i), end=str(i + frames_per_task - 1))
@@ -148,6 +144,14 @@ class SubmitterNuke(QtWidgets.QMainWindow):
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
             msg.setText("Job Send !")
+            msg.setWindowTitle("RenderFarm")
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.buttonClicked.connect(self.close)
+            msg.exec_()
+        except IndexError:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("File not valid")
             msg.setWindowTitle("RenderFarm")
             msg.setStandardButtons(QMessageBox.Ok)
             msg.buttonClicked.connect(self.close)
