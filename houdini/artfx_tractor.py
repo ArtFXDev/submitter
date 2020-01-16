@@ -82,7 +82,6 @@ def submit(node):
             env_job = env_job.replace("I:/SynologyDrive/VERLAN", "/ana/VERLAN")
 
 
-        print(env_vars)
         file_name = hou.hipFile.basename()
         file_split = file_name.split(".")
 
