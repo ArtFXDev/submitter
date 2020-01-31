@@ -1,4 +1,7 @@
-import hou
+try:
+    import hou
+except:
+    print('Outside Houdini')
 import sys
 import os
 from datetime import datetime
@@ -6,15 +9,44 @@ from datetime import datetime
 paths = ['', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\site-packages\\setuptools-0.6c11-py2.7.egg', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\DLLs\\python27.zip', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\DLLs', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\plat-win', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\lib-tk', 'C:\\Program Files\\Pixar\\Tractor-2.3\\bin', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\site-packages']
 
 for path in paths:
+    if not os.path.exists(r'C:\\Program Files\\Pixar\\Tractor-2.3'):
+        path = path.replace(r'C:\Program Files\Pixar\Tractor-2.3', '//multifct/tools/pipeline/global/softwares/Tractor-2.3')
     sys.path.append(path)
 
 import tractor.api.author as author
 
+envs = ['JOB', 'WIPCACHE', 'PUBCACHE', 'ASSET', 'SHOT', 'PROJECT', 'IMAGES_OUT']  # Hou env variables
+
+project_server = {
+
+    'A_PIPE': 'marvin',
+    'ARAL': 'marvin',
+    'CLAIR_DE_LUNE': 'marvin',
+    'FORGOT_YOUR_PASSWORD': 'marvin',
+    'LOREE': 'marvin',
+    'RESURGENCE': 'marvin',
+    'TIMES_DOWN': 'marvin',
+
+    'ASCEND': 'tars',
+    'ISSEN_SAMA': 'tars',
+    'LONE': 'tars',
+    'MOON_KEEPER': 'tars',
+
+    'BREACH': 'ana',
+    'HARU': 'ana',
+    'VERLAN': 'ana'
+
+}
+
 def submit(node):
+
+    if hou.hipFile.hasUnsavedChanges():
+        hou.ui.displayMessage('Your scene needs to be saved before submission', buttons=('OK',), severity=hou.severityType.Message)
+        return
 
     file = hou.hipFile.name()
 
-    job_name = node.parm("job_name").evalAsString()
+    job_name = node.parm("job_name").evalAsString() or hou.expandString('$FARM')
     output_driver = node.parm("output_driver").evalAsString()
     start = node.parm("f1").evalAsFloat()
     end = node.parm("f2").evalAsFloat()
@@ -31,11 +63,23 @@ def submit(node):
     teams_tokens = node.parm("teams").parmTemplate().menuItems()
     teams = [token for n, token in enumerate(teams_tokens) if teams_bitfield & (1 << n)]
 
+    current_project = os.path.basename(hou.expandString('$PROJECT'))
+    current_server = project_server.get(current_project)
+
+    if not current_project and current_server:
+        hou.ui.displayMessage('Project could not be identified - check env variables.', buttons=('OK',),
+                              severity=hou.severityType.Warning)
+        return
+
+    print 'We are on ', current_project, current_server
+
     file_path = file
 
     service_rooms = " || ".join(rooms)
     service_teams = " || ".join(teams)
+
     if simu == 0:
+        service = None
         if ram == 0:
             if len(rooms) > 0 and len(teams) > 0:
                 service = '(({rooms}) && ram_32) || ({teams})'.format(rooms=service_rooms, teams=service_teams)
@@ -58,145 +102,76 @@ def submit(node):
             elif len(teams) > 0:
                 service = '{teams}'.format(rooms=service_rooms, teams=service_teams)
 
-        env_job = hou.getenv('JOB')
+        if not service:
+            hou.ui.displayMessage('Please check your submission settings.', buttons=('OK',),
+                                  severity=hou.severityType.Warning)
+            return
 
-        if env_job != None:
-            env_job = env_job.replace("I:/SynologyDrive/A_PIPE", "//marvin/A_PIPE")
-            ##### DIR MAP MARVIN #####
-            env_job = env_job.replace("I:/SynologyDrive/ARAL", "//marvin/ARAL")
-            env_job = env_job.replace("I:/SynologyDrive/CLAIR_DE_LUNE", "//marvin/CLAIR_DE_LUNE")
-            env_job = env_job.replace("I:/SynologyDrive/FORGOT_YOUR_PASSWORD", "//marvin/FORGOT_YOUR_PASSWORD")
-            env_job = env_job.replace("I:/SynologyDrive/LOREE", "//marvin/LOREE")
-            env_job = env_job.replace("I:/SynologyDrive/RESURGENCE", "//marvin/RESURGENCE")
-            env_job = env_job.replace("I:/SynologyDrive/TIMES_DOWN", "//marvin/TIMES_DOWN")
+        for var, env_job in [(v, hou.getenv(v)) for v in envs]:
+            if not env_job:
+                continue
+            for project, server in project_server.iteritems():
+                env_job = env_job.replace('I:/SynologyDrive/{}'.format(project), '//{}/PFE_RN_2020/{}'.format(server, project))
+            hou.hscript('setenv {}={}'.format(var, env_job))
+            print('setenv {}={}'.format(var, env_job))
 
-            ##### DIR MAP TARS #####
-            env_job = env_job.replace("I:/SynologyDrive/ASCEND", "//tars/ASCEND")
-            env_job = env_job.replace("I:/SynologyDrive/ISSEN_SAMA", "//tars/ISSEN_SAMA")
-            env_job = env_job.replace("I:/SynologyDrive/LONE", "//tars/LONE")
-            env_job = env_job.replace("I:/SynologyDrive/MOON_KEEPER", "//tars/MOON_KEEPER")
+        for project, server in project_server.iteritems():
+            hou.hscript('opchange I:/SynologyDrive/{project} //{server}/PFE_RN_2020/{project}'.format(project=project,
+                                                                                                      server=server))
+        root_path = '//{server}/PFE_RN_2020/{project}'.format(project=current_project, server=current_server)
 
-            ##### DIR MAP ANA #####
-            env_job = env_job.replace("I:/SynologyDrive/BREACH", "//ana/BREACH")
-            env_job = env_job.replace("I:/SynologyDrive/HARU", "//ana/HARU")
-            env_job = env_job.replace("I:/SynologyDrive/VERLAN", "//ana/VERLAN")
-
-
-        file_name = hou.hipFile.basename()
-        file_split = file_name.split(".")
-
-        path_split = file.split("/")
-
-        render_path = '/'.join(path_split[:-2]) + '/render'
-        now = datetime.now()
-        timestamp = now.strftime("%m-%d-%Y_%H-%M-%S")
-        new_name = "{version}_{file_name}_{timestamp}.{extension}".format(version=path_split[-2], file_name=file_split[0], timestamp=timestamp, extension=file_split[-1])
-        path = os.path.join(render_path, new_name)
-        new_name_path = path.replace(os.sep, '/')
-
-
-        if not os.path.exists(render_path):
-            os.mkdir(render_path)
-
-        hou.hipFile.setName(new_name_path)
-
-        file_path = new_name_path
-
-        if env_job != None:
-            hou.putenv("JOB", env_job)
-
-        hou.hscript("opchange I:/SynologyDrive/A_PIPE //marvin/PFE_RN_2020/A_PIPE")
-        ##### DIR MAP MARVIN #####
-        hou.hscript("opchange I:/SynologyDrive/ARAL //marvin/PFE_RN_2020/ARAL")
-        hou.hscript("opchange I:/SynologyDrive/CLAIR_DE_LUNE //marvin/PFE_RN_2020/CLAIR_DE_LUNE")
-        hou.hscript("opchange I:/SynologyDrive/FORGOT_YOUR_PASSWORD //marvin/PFE_RN_2020/FORGOT_YOUR_PASSWORD")
-        hou.hscript("opchange I:/SynologyDrive/LOREE //marvin/PFE_RN_2020/LOREE")
-        hou.hscript("opchange I:/SynologyDrive/RESURGENCE //marvin/PFE_RN_2020/RESURGENCE")
-        hou.hscript("opchange I:/SynologyDrive/TIMES_DOWN //marvin/PFE_RN_2020/TIMES_DOWN")
-
-        ##### DIR MAP TARS #####
-        hou.hscript("opchange I:/SynologyDrive/ASCEND //tars/PFE_RN_2020/ASCEND")
-        hou.hscript("opchange I:/SynologyDrive/ISSEN_SAMA //tars/PFE_RN_2020/ISSEN_SAMA")
-        hou.hscript("opchange I:/SynologyDrive/LONE //tars/PFE_RN_2020/LONE")
-        hou.hscript("opchange I:/SynologyDrive/MOON_KEEPER //tars/PFE_RN_2020/MOON_KEEPER")
-
-        ##### DIR MAP ANA #####
-        hou.hscript("opchange I:/SynologyDrive/BREACH //ana/PFE_RN_2020/BREACH")
-        hou.hscript("opchange I:/SynologyDrive/HARU //ana/PFE_RN_2020/HARU")
-        hou.hscript("opchange I:/SynologyDrive/VERLAN //ana/PFE_RN_2020/VERLAN")
-
-        hou.hipFile.save(file_name=None)
     else:
         service = "simu"
         author.setEngineClientParam(user="hquser")
 
-        env_job = hou.getenv('JOB')
+        for var, env_job in [(v, hou.getenv(v)) for v in envs]:
+            if not env_job:
+                continue
+            for project, server in project_server.iteritems():
+                env_job = env_job.replace('I:/SynologyDrive/{}'.format(project), '/{}/{}'.format(server, project))
+            hou.hscript('setenv {}={}'.format(var, env_job))
+            print('setenv {}={}'.format(var, env_job))
 
-        if env_job != None:
-            env_job = env_job.replace("I:/SynologyDrive/A_PIPE", "/marvin/A_PIPE")
-            ##### DIR MAP MARVIN #####
-            env_job = env_job.replace("I:/SynologyDrive/ARAL", "/marvin/ARAL")
-            env_job = env_job.replace("I:/SynologyDrive/CLAIR_DE_LUNE", "/marvin/CLAIR_DE_LUNE")
-            env_job = env_job.replace("I:/SynologyDrive/FORGOT_YOUR_PASSWORD", "/marvin/FORGOT_YOUR_PASSWORD")
-            env_job = env_job.replace("I:/SynologyDrive/LOREE", "/marvin/LOREE")
-            env_job = env_job.replace("I:/SynologyDrive/RESURGENCE", "/marvin/RESURGENCE")
-            env_job = env_job.replace("I:/SynologyDrive/TIMES_DOWN", "/marvin/TIMES_DOWN")
+        for project, server in project_server.iteritems():
+            hou.hscript('opchange I:/SynologyDrive/{project} /{server}/{project}'.format(project=project, server=server))
 
-            ##### DIR MAP TARS #####
-            env_job = env_job.replace("I:/SynologyDrive/ASCEND", "/tars/ASCEND")
-            env_job = env_job.replace("I:/SynologyDrive/ISSEN_SAMA", "/tars/ISSEN_SAMA")
-            env_job = env_job.replace("I:/SynologyDrive/LONE", "/tars/LONE")
-            env_job = env_job.replace("I:/SynologyDrive/MOON_KEEPER", "/tars/MOON_KEEPER")
-
-            ##### DIR MAP ANA #####
-            env_job = env_job.replace("I:/SynologyDrive/BREACH", "/ana/BREACH")
-            env_job = env_job.replace("I:/SynologyDrive/HARU", "/ana/HARU")
-            env_job = env_job.replace("I:/SynologyDrive/VERLAN", "/ana/VERLAN")
+        root_path = '/{server}/{project}'.format(project=current_project, server=current_server)
 
 
-        file_name = hou.hipFile.basename()
-        file_split = file_name.split(".")
+    # Temp file save
+    file_name = hou.hipFile.basename()
+    file_split = file_name.split(".")
 
-        path_split = file.split("/")
+    path_split = file.split("/")
 
-        render_path = '/'.join(path_split[:-2]) + '/render'
-        now = datetime.now()
-        timestamp = now.strftime("%m-%d-%Y_%H-%M-%S")
-        new_name = "{version}_{file_name}_{timestamp}.{extension}".format(version=path_split[-2], file_name=file_split[0], timestamp=timestamp, extension=file_split[-1])
-        path = os.path.join(render_path, new_name)
-        new_name_path = path.replace(os.sep, '/')
+    render_path = '/'.join(path_split[:-2]) + '/render'
 
-        if not os.path.exists(render_path):
-            os.mkdir(render_path)
+    # Submission on the server directly
+    render_path = render_path.replace('I:/SynologyDrive/{project}'.format(project=current_project), root_path)
 
-        hou.hipFile.setName(new_name_path)
+    now = datetime.now()
+    timestamp = now.strftime("%m-%d-%Y_%H-%M-%S")
+    new_name = "{version}_{file_name}_{timestamp}.{extension}".format(version=path_split[-2], file_name=file_split[0],
+                                                                      timestamp=timestamp, extension=file_split[-1])
+    path = os.path.join(render_path, new_name)
+    new_name_path = path.replace(os.sep, '/')
 
-        file_path = new_name_path
+    if not os.path.exists(render_path):
+        if not os.path.exists(os.path.dirname(render_path)):
+            if not hou.ui.displayConfirmation('The scene path does not exist on the server. \n{}\nAre you sure you want to create it ?'.format(render_path),
+                                       severity=hou.severityType.Message):
 
-        if env_job != None:
-            hou.putenv("JOB", env_job)
+                # reloading user file
+                hou.hipFile.load(file, suppress_save_prompt=True)
+                return
+            else:
+                os.makedirs(os.path.dirname(render_path))
+        os.mkdir(render_path)
 
-        hou.hscript("opchange I:/SynologyDrive/A_PIPE marvin/A_PIPE")
-        ##### DIR MAP MARVIN #####
-        hou.hscript("opchange I:/SynologyDrive/ARAL /marvin/ARAL")
-        hou.hscript("opchange I:/SynologyDrive/CLAIR_DE_LUNE /marvin/CLAIR_DE_LUNE")
-        hou.hscript("opchange I:/SynologyDrive/FORGOT_YOUR_PASSWORD /marvin/FORGOT_YOUR_PASSWORD")
-        hou.hscript("opchange I:/SynologyDrive/LOREE /marvin/LOREE")
-        hou.hscript("opchange I:/SynologyDrive/RESURGENCE /marvin/RESURGENCE")
-        hou.hscript("opchange I:/SynologyDrive/TIMES_DOWN /marvin/TIMES_DOWN")
+    hou.hipFile.setName(new_name_path)
 
-        ##### DIR MAP TARS #####
-        hou.hscript("opchange I:/SynologyDrive/ASCEND /tars/ASCEND")
-        hou.hscript("opchange I:/SynologyDrive/ISSEN_SAMA /tars/ISSEN_SAMA")
-        hou.hscript("opchange I:/SynologyDrive/LONE /tars/LONE")
-        hou.hscript("opchange I:/SynologyDrive/MOON_KEEPER /tars/MOON_KEEPER")
-
-        ##### DIR MAP ANA #####
-        hou.hscript("opchange I:/SynologyDrive/BREACH /ana/BREACH")
-        hou.hscript("opchange I:/SynologyDrive/HARU /ana/HARU")
-        hou.hscript("opchange I:/SynologyDrive/VERLAN /ana/VERLAN")
-
-        hou.hipFile.save(file_name=None)
+    file_path = new_name_path
+    hou.hipFile.save(file_name=None)
 
 
     job = author.Job(title=job_name, priority=100, service=str(service))
@@ -269,3 +244,7 @@ def submit(node):
     newJid = job.spool()
 
     hou.hipFile.load(file, suppress_save_prompt=True)
+
+    hou.ui.displayMessage('Scene was submitted as {}'.format(new_name_path), buttons=('OK',),
+                          severity=hou.severityType.Message)
+
