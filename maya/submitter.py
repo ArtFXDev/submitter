@@ -133,9 +133,12 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         try:
             for i in range(start, end, frames_per_task):
                 task_command = [
-                    "C:/Maya2019/bin/Render.exe", "-r", "sw", "-s", "{start}".format(
-                        start=str(start)), "-e", "{end}".format(end=str(end)),
-                    "-proj", "%D({proj})".format(proj=proj), "%D({file_path})".format(file_path=file_path)]
+                    "C:/Maya2019/bin/Render.exe",
+                    "-r", "file",
+                    "-s", "{start}".format(start=str(start)),
+                    "-e", "{end}".format(end=str(end)),
+                    "-proj", "%D({proj})".format(proj=proj),
+                    "%D({file_path})".format(file_path=file_path)]
 
                 task_name = "frame {start}-{end}".format(
                     start=str(i), end=str(i + frames_per_task - 1))
