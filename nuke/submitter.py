@@ -20,7 +20,6 @@ import tractor.api.author as author
 rams = ["All ram", "ram_32", "ram_lower"]
 projects = ["aral", "ascend", "breach", "clair_de_lune", "fyp", "haru", "issen_sama",
             "lone", "loree", "moon_keeper", "resurgence", "times_down", "verlan"]
-salles = ["s104", "s110", "s111", "s201", "s202", "s211", "s212", "s213"]
 
 
 class SubmitterNuke(QtWidgets.QMainWindow):
@@ -39,7 +38,7 @@ class SubmitterNuke(QtWidgets.QMainWindow):
         self.input_frame_end.setText('2')
         for project in projects:
             self.list_project.addItem(project)
-        for salle in salles:
+        for salle in projects:
             self.list_salle.addItem(salle)
         for ram in rams:
             self.cb_ram.addItem(ram)
@@ -61,7 +60,7 @@ class SubmitterNuke(QtWidgets.QMainWindow):
         ram_selected = self.cb_ram.currentText()
 
         for select in self.list_salle.selectedItems():
-            salles_selected.append(select.text())
+            salles_selected.append("p_" + select.text())
         for project in self.list_project.selectedItems():
             projects_selected.append(project.text())
         if self.rb_frame.isChecked():
