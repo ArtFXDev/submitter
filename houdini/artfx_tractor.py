@@ -136,7 +136,8 @@ def submit(node):
             hou.hscript('opchange I:/SynologyDrive/{project} /{server}/{project}'.format(project=project, server=server))
             hou.hscript('opchange //{server}/PFE_RN_2020/{project} /{server}/{project}'.format(project=project, server=server))
 
-        root_path = '/{server}/{project}'.format(project=current_project, server=current_server)
+        root_path_linux = '/{server}/{project}'.format(project=current_project, server=current_server)
+        root_path = '//{server}/PFE_RN_2020/{project}'.format(project=current_project, server=current_server)
 
 
     # Temp file save
@@ -174,6 +175,8 @@ def submit(node):
     file_path = new_name_path
     hou.hipFile.save(file_name=None)
 
+    if simu and service == 'simu':
+        file_path = file_path.replace(root_path, root_path_linux)
 
     job = author.Job(title=job_name, priority=100, service=str(service))
 
