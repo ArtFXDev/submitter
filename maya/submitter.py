@@ -20,7 +20,6 @@ import tractor.api.author as author
 rams = ["All ram", "ram_32", "ram_lower"]
 projects = ["aral", "ascend", "breach", "clair_de_lune", "fyp", "haru", "issen_sama",
             "lone", "loree", "moon_keeper", "resurgence", "times_down", "verlan"]
-salles = ["s104", "s110", "s111", "s201", "s202", "s211", "s212", "s213"]
 
 
 class SubmitterMaya(QtWidgets.QMainWindow):
@@ -36,10 +35,10 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         self.input_frame_per_task.setText('10')
         self.input_frame_increment.setText('1')
         self.input_frame_start.setText('1')
-        self.input_frame_end.setText('2')
+        self.input_frame_end.setText('1')
         for project in projects:
             self.list_project.addItem(project)
-        for salle in salles:
+        for salle in projects:
             self.list_salle.addItem(salle)
         for ram in rams:
             self.cb_ram.addItem(ram)
@@ -50,7 +49,7 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         else:
             self.widget_frame.setVisible(False)
             self.input_frame_start.setText('1')
-            self.input_frame_end.setText('2')
+            self.input_frame_end.setText('1')
 
     def submit(self):
         job_name = str(self.input_job_name.text())
@@ -63,7 +62,7 @@ class SubmitterMaya(QtWidgets.QMainWindow):
             os.sep, '/').split('/scenes')[0]
         print 'Project : ', proj
         for select in self.list_salle.selectedItems():
-            salles_selected.append(select.text())
+            salles_selected.append("p_" + select.text())
         for project in self.list_project.selectedItems():
             projects_selected.append(project.text())
         if self.rb_frame.isChecked():
@@ -131,14 +130,18 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         # job.newDirMap(src="I:/SynologyDrive", dst="//marvin/PFE_RN_2020", zone="NFS")
         # print 'range', range(start, end, frames_per_task)
         try:
+            if frames_per_task > (end - start):
+                frames_per_task = (end + 1 - start)
             for i in range(start, end, frames_per_task):
                 task_command = [
                     "C:/Maya2019/bin/Render.exe",
                     "-r", "file",
-                    "-s", "{start}".format(start=str(start)),
-                    "-e", "{end}".format(end=str(end)),
+                    "-s", "{start}".format(start=str(i)),
+                    "-e", "{end}".format(end=str(i + frames_per_task - 1)),
                     "-proj", "%D({proj})".format(proj=proj),
                     "%D({file_path})".format(file_path=file_path)]
+
+                # "-preRender", 'source //multifct/tools/pipeline/prod/packages/Tractor-ArtFx/maya/dirmap_{serv}.mel;'.format(serv = serv),
 
                 task_name = "frame {start}-{end}".format(
                     start=str(i), end=str(i + frames_per_task - 1))
