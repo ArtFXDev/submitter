@@ -134,6 +134,7 @@ def submit(node):
 
         for project, server in project_server.iteritems():
             hou.hscript('opchange I:/SynologyDrive/{project} /{server}/{project}'.format(project=project, server=server))
+        hou.hscript('opchange //{server}/PFE_RN_2020/{project} /{server}/{project}'.format(project=project, server=server))
 
         root_path = '/{server}/{project}'.format(project=current_project, server=current_server)
 
