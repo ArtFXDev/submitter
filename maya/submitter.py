@@ -35,7 +35,7 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         self.input_frame_per_task.setText('10')
         self.input_frame_increment.setText('1')
         self.input_frame_start.setText('1')
-        self.input_frame_end.setText('1')
+        self.input_frame_end.setText('2')
         for project in projects:
             self.list_project.addItem(project)
         for salle in projects:
@@ -49,7 +49,7 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         else:
             self.widget_frame.setVisible(False)
             self.input_frame_start.setText('1')
-            self.input_frame_end.setText('1')
+            self.input_frame_end.setText('2')
 
     def submit(self):
         job_name = str(self.input_job_name.text())
@@ -130,18 +130,14 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         # job.newDirMap(src="I:/SynologyDrive", dst="//marvin/PFE_RN_2020", zone="NFS")
         # print 'range', range(start, end, frames_per_task)
         try:
-            if frames_per_task > (end - start):
-                frames_per_task = (end + 1 - start)
             for i in range(start, end, frames_per_task):
                 task_command = [
                     "C:/Maya2019/bin/Render.exe",
                     "-r", "file",
-                    "-s", "{start}".format(start=str(i)),
-                    "-e", "{end}".format(end=str(i + frames_per_task - 1)),
+                    "-s", "{start}".format(start=str(start)),
+                    "-e", "{end}".format(end=str(end)),
                     "-proj", "%D({proj})".format(proj=proj),
                     "%D({file_path})".format(file_path=file_path)]
-
-                # "-preRender", 'source //multifct/tools/pipeline/prod/packages/Tractor-ArtFx/maya/dirmap_{serv}.mel;'.format(serv = serv),
 
                 task_name = "frame {start}-{end}".format(
                     start=str(i), end=str(i + frames_per_task - 1))

@@ -1,21 +1,22 @@
-try:
-    import hou
-except:
-    print('Outside Houdini')
+import hou
 import sys
 import os
 from datetime import datetime
+from math import *
 
-paths = ['', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\site-packages\\setuptools-0.6c11-py2.7.egg', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\DLLs\\python27.zip', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\DLLs', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\plat-win', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\lib-tk', 'C:\\Program Files\\Pixar\\Tractor-2.3\\bin', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\site-packages']
+paths = ['', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\site-packages\\setuptools-0.6c11-py2.7.egg', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\DLLs\\python27.zip', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\DLLs', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib',
+         'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\plat-win', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\lib-tk', 'C:\\Program Files\\Pixar\\Tractor-2.3\\bin', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7', 'C:\\Program Files\\Pixar\\Tractor-2.3\\lib\\python2.7\\lib\\site-packages']
 
 for path in paths:
     if not os.path.exists(r'C:\\Program Files\\Pixar\\Tractor-2.3'):
-        path = path.replace(r'C:\Program Files\Pixar\Tractor-2.3', '//multifct/tools/pipeline/global/softwares/Tractor-2.3')
+        path = path.replace(r'C:\Program Files\Pixar\Tractor-2.3',
+                            '//multifct/tools/pipeline/global/softwares/Tractor-2.3')
     sys.path.append(path)
 
 import tractor.api.author as author
 
-envs = ['JOB', 'WIPCACHE', 'PUBCACHE', 'ASSET', 'SHOT', 'PROJECT', 'IMAGES_OUT']  # Hou env variables
+envs = ['JOB', 'WIPCACHE', 'PUBCACHE', 'ASSET', 'SHOT',
+        'PROJECT', 'IMAGES_OUT']  # Hou env variables
 
 project_server = {
 
@@ -38,30 +39,41 @@ project_server = {
 
 }
 
+
 def submit(node):
 
     if hou.hipFile.hasUnsavedChanges():
-        hou.ui.displayMessage('Your scene needs to be saved before submission', buttons=('OK',), severity=hou.severityType.Message)
+        hou.ui.displayMessage('Your scene needs to be saved before submission', buttons=(
+            'OK',), severity=hou.severityType.Message)
         return
 
     file = hou.hipFile.name()
 
-    job_name = node.parm("job_name").evalAsString() or hou.expandString('$FARM')
+    job_name = node.parm("job_name").evalAsString(
+    ) or hou.expandString('$FARM')
     output_driver = node.parm("output_driver").evalAsString()
+
+    inputs = node.inputs()
+
     start = node.parm("f1").evalAsFloat()
     end = node.parm("f2").evalAsFloat()
     # increment = node.parm("f3").evalAsFloat()
-    frames_per_task = node.parm("frames_task").evalAsInt()
+    nbFrames = int(end) - int(start)
+    frames_per_task = int(
+        ceil((nbFrames) / node.parm("frames_task").evalAsInt())) + 1
     simu = node.parm("simu").evalAsInt()
     ram = node.parm("ram").evalAsInt()
+    gpu = node.parm("gpu").evalAsInt()
 
     rooms_bitfield = node.parm("rooms").eval()
     rooms_tokens = node.parm("rooms").parmTemplate().menuItems()
-    rooms = [token for n, token in enumerate(rooms_tokens) if rooms_bitfield & (1 << n)]
+    rooms = [token for n, token in enumerate(
+        rooms_tokens) if rooms_bitfield & (1 << n)]
 
     teams_bitfield = node.parm("teams").eval()
     teams_tokens = node.parm("teams").parmTemplate().menuItems()
-    teams = [token for n, token in enumerate(teams_tokens) if teams_bitfield & (1 << n)]
+    teams = [token for n, token in enumerate(
+        teams_tokens) if teams_bitfield & (1 << n)]
 
     current_project = os.path.basename(hou.expandString('$PROJECT'))
     current_server = project_server.get(current_project)
@@ -82,43 +94,59 @@ def submit(node):
         service = None
         if ram == 0:
             if len(rooms) > 0 and len(teams) > 0:
-                service = '(({rooms}) && ram_32) || ({teams})'.format(rooms=service_rooms, teams=service_teams)
+                service = '(({rooms}) && ram_32) || ({teams})'.format(
+                    rooms=service_rooms, teams=service_teams)
             elif len(rooms) > 0:
-                service = '({rooms}) && ram_32'.format(rooms=service_rooms, teams=service_teams)
+                service = '({rooms}) && ram_32'.format(
+                    rooms=service_rooms, teams=service_teams)
             elif len(teams) > 0:
-                service = '{teams}'.format(rooms=service_rooms, teams=service_teams)
+                service = '{teams}'.format(
+                    rooms=service_rooms, teams=service_teams)
         elif ram == 1:
             if len(rooms) > 0 and len(teams) > 0:
-                service = '(({rooms}) && !ram_32) || ({teams})'.format(rooms=service_rooms, teams=service_teams)
+                service = '(({rooms}) && !ram_32) || ({teams})'.format(
+                    rooms=service_rooms, teams=service_teams)
             elif len(rooms) > 0:
-                service = '({rooms}) && !ram_32'.format(rooms=service_rooms, teams=service_teams)
+                service = '({rooms}) && !ram_32'.format(
+                    rooms=service_rooms, teams=service_teams)
             elif len(teams) > 0:
-                service = '{teams}'.format(rooms=service_rooms, teams=service_teams)
+                service = '{teams}'.format(
+                    rooms=service_rooms, teams=service_teams)
         else:
             if len(rooms) > 0 and len(teams) > 0:
-                service = '({rooms}) || ({teams})'.format(rooms=service_rooms, teams=service_teams)
+                service = '({rooms}) || ({teams})'.format(
+                    rooms=service_rooms, teams=service_teams)
             elif len(rooms) > 0:
-                service = '{rooms}'.format(rooms=service_rooms, teams=service_teams)
+                service = '{rooms}'.format(
+                    rooms=service_rooms, teams=service_teams)
             elif len(teams) > 0:
-                service = '{teams}'.format(rooms=service_rooms, teams=service_teams)
+                service = '{teams}'.format(
+                    rooms=service_rooms, teams=service_teams)
 
         if not service:
             hou.ui.displayMessage('Please check your submission settings.', buttons=('OK',),
                                   severity=hou.severityType.Warning)
             return
+        else:
+            if gpu == 0:
+                service += " && gpu"
+            elif gpu == 1:
+                service += " && !gpu"
 
         for var, env_job in [(v, hou.getenv(v)) for v in envs]:
             if not env_job:
                 continue
             for project, server in project_server.iteritems():
-                env_job = env_job.replace('I:/SynologyDrive/{}'.format(project), '//{}/PFE_RN_2020/{}'.format(server, project))
+                env_job = env_job.replace(
+                    'I:/SynologyDrive/{}'.format(project), '//{}/PFE_RN_2020/{}'.format(server, project))
             hou.hscript('setenv {}={}'.format(var, env_job))
             print('setenv {}={}'.format(var, env_job))
 
         for project, server in project_server.iteritems():
             hou.hscript('opchange I:/SynologyDrive/{project} //{server}/PFE_RN_2020/{project}'.format(project=project,
                                                                                                       server=server))
-        root_path = '//{server}/PFE_RN_2020/{project}'.format(project=current_project, server=current_server)
+        root_path = '//{server}/PFE_RN_2020/{project}'.format(
+            project=current_project, server=current_server)
 
     else:
         service = "simu"
@@ -128,17 +156,21 @@ def submit(node):
             if not env_job:
                 continue
             for project, server in project_server.iteritems():
-                env_job = env_job.replace('I:/SynologyDrive/{}'.format(project), '/{}/{}'.format(server, project))
+                env_job = env_job.replace(
+                    'I:/SynologyDrive/{}'.format(project), '/{}/{}'.format(server, project))
             hou.hscript('setenv {}={}'.format(var, env_job))
             print('setenv {}={}'.format(var, env_job))
 
         for project, server in project_server.iteritems():
-            hou.hscript('opchange I:/SynologyDrive/{project} /{server}/{project}'.format(project=project, server=server))
-            hou.hscript('opchange //{server}/PFE_RN_2020/{project} /{server}/{project}'.format(project=project, server=server))
+            hou.hscript(
+                'opchange I:/SynologyDrive/{project} /{server}/{project}'.format(project=project, server=server))
+            hou.hscript('opchange //{server}/PFE_RN_2020/{project} /{server}/{project}'.format(
+                project=project, server=server))
 
-        root_path_linux = '/{server}/{project}'.format(project=current_project, server=current_server)
-        root_path = '//{server}/PFE_RN_2020/{project}'.format(project=current_project, server=current_server)
-
+        root_path_linux = '/{server}/{project}'.format(
+            project=current_project, server=current_server)
+        root_path = '//{server}/PFE_RN_2020/{project}'.format(
+            project=current_project, server=current_server)
 
     # Temp file save
     file_name = hou.hipFile.basename()
@@ -149,10 +181,11 @@ def submit(node):
     render_path = '/'.join(path_split[:-2]) + '/render'
 
     # Submission on the server directly
-    render_path = render_path.replace('I:/SynologyDrive/{project}'.format(project=current_project), root_path)
+    # render_path = render_path.replace('I:/SynologyDrive/{project}'.format(project=current_project), root_path)
 
     now = datetime.now()
     timestamp = now.strftime("%m-%d-%Y_%H-%M-%S")
+
     new_name = "{version}_{file_name}_{timestamp}.{extension}".format(version=path_split[-2], file_name=file_split[0],
                                                                       timestamp=timestamp, extension=file_split[-1])
     path = os.path.join(render_path, new_name)
@@ -161,7 +194,7 @@ def submit(node):
     if not os.path.exists(render_path):
         if not os.path.exists(os.path.dirname(render_path)):
             if not hou.ui.displayConfirmation('The scene path does not exist on the server. \n{}\nAre you sure you want to create it ?'.format(render_path),
-                                       severity=hou.severityType.Message):
+                                              severity=hou.severityType.Message):
 
                 # reloading user file
                 hou.hipFile.load(file, suppress_save_prompt=True)
@@ -181,36 +214,49 @@ def submit(node):
     job = author.Job(title=job_name, priority=100, service=str(service))
 
     # job.newDirMap(src="I:/SynologyDrive/A_PIPE", dst="//marvin/PFE_RN_2020/A_PIPE", zone="UNC")
-    job.newDirMap(src="I:/SynologyDrive/A_PIPE", dst="/marvin/A_PIPE", zone="NFS")
+    job.newDirMap(src="I:/SynologyDrive/A_PIPE",
+                  dst="/marvin/A_PIPE", zone="NFS")
 
-
-    job.newDirMap(src="C:/Houdini17/bin/hython.exe", dst="/opt/hfs17.5/bin/hython", zone="NFS")
-    job.newDirMap(src="C:/Houdini17/bin/hrender.py", dst="/opt/hfs17.5/bin/hrender.py", zone="NFS")
-
+    job.newDirMap(src="C:/Houdini17/bin/hython.exe",
+                  dst="/opt/hfs17.5/bin/hython", zone="NFS")
+    job.newDirMap(src="C:/Houdini17/bin/hrender.py",
+                  dst="/opt/hfs17.5/bin/hrender.py", zone="NFS")
 
     ###########################
     ##### DIR MAP WINDOWS #####
     ###########################
 
     ##### DIR MAP MARVIN #####
-    job.newDirMap(src="I:/SynologyDrive/ARAL", dst="//marvin/PFE_RN_2020/ARAL", zone="UNC")
-    job.newDirMap(src="I:/SynologyDrive/CLAIR_DE_LUNE", dst="//marvin/PFE_RN_2020/CLAIR_DE_LUNE", zone="UNC")
-    job.newDirMap(src="I:/SynologyDrive/FORGOT_YOUR_PASSWORD", dst="//marvin/PFE_RN_2020/FORGOT_YOUR_PASSWORD", zone="UNC")
-    job.newDirMap(src="I:/SynologyDrive/LOREE", dst="//marvin/PFE_RN_2020/LOREE", zone="UNC")
-    job.newDirMap(src="I:/SynologyDrive/RESURGENCE", dst="//marvin/PFE_RN_2020/RESURGENCE", zone="UNC")
-    job.newDirMap(src="I:/SynologyDrive/TIMES_DOWN", dst="//marvin/PFE_RN_2020/TIMES_DOWN", zone="UNC")
+    job.newDirMap(src="I:/SynologyDrive/ARAL",
+                  dst="//marvin/PFE_RN_2020/ARAL", zone="UNC")
+    job.newDirMap(src="I:/SynologyDrive/CLAIR_DE_LUNE",
+                  dst="//marvin/PFE_RN_2020/CLAIR_DE_LUNE", zone="UNC")
+    job.newDirMap(src="I:/SynologyDrive/FORGOT_YOUR_PASSWORD",
+                  dst="//marvin/PFE_RN_2020/FORGOT_YOUR_PASSWORD", zone="UNC")
+    job.newDirMap(src="I:/SynologyDrive/LOREE",
+                  dst="//marvin/PFE_RN_2020/LOREE", zone="UNC")
+    job.newDirMap(src="I:/SynologyDrive/RESURGENCE",
+                  dst="//marvin/PFE_RN_2020/RESURGENCE", zone="UNC")
+    job.newDirMap(src="I:/SynologyDrive/TIMES_DOWN",
+                  dst="//marvin/PFE_RN_2020/TIMES_DOWN", zone="UNC")
 
     ##### DIR MAP TARS #####
-    job.newDirMap(src="I:/SynologyDrive/ASCEND", dst="//tars/PFE_RN_2020/ASCEND", zone="UNC")
-    job.newDirMap(src="I:/SynologyDrive/ISSEN_SAMA", dst="//tars/PFE_RN_2020/ISSEN_SAMA", zone="UNC")
-    job.newDirMap(src="I:/SynologyDrive/LONE", dst="//tars/PFE_RN_2020/LONE", zone="UNC")
-    job.newDirMap(src="I:/SynologyDrive/MOON_KEEPER", dst="//tars/PFE_RN_2020/MOON_KEEPER", zone="UNC")
+    job.newDirMap(src="I:/SynologyDrive/ASCEND",
+                  dst="//tars/PFE_RN_2020/ASCEND", zone="UNC")
+    job.newDirMap(src="I:/SynologyDrive/ISSEN_SAMA",
+                  dst="//tars/PFE_RN_2020/ISSEN_SAMA", zone="UNC")
+    job.newDirMap(src="I:/SynologyDrive/LONE",
+                  dst="//tars/PFE_RN_2020/LONE", zone="UNC")
+    job.newDirMap(src="I:/SynologyDrive/MOON_KEEPER",
+                  dst="//tars/PFE_RN_2020/MOON_KEEPER", zone="UNC")
 
     ##### DIR MAP ANA #####
-    job.newDirMap(src="I:/SynologyDrive/BREACH", dst="//ana/PFE_RN_2020/BREACH", zone="UNC")
-    job.newDirMap(src="I:/SynologyDrive/HARU", dst="//ana/PFE_RN_2020/HARU", zone="UNC")
-    job.newDirMap(src="I:/SynologyDrive/VERLAN", dst="//ana/PFE_RN_2020/VERLAN", zone="UNC")
-
+    job.newDirMap(src="I:/SynologyDrive/BREACH",
+                  dst="//ana/PFE_RN_2020/BREACH", zone="UNC")
+    job.newDirMap(src="I:/SynologyDrive/HARU",
+                  dst="//ana/PFE_RN_2020/HARU", zone="UNC")
+    job.newDirMap(src="I:/SynologyDrive/VERLAN",
+                  dst="//ana/PFE_RN_2020/VERLAN", zone="UNC")
 
     #########################
     ##### DIR MAP LINUX #####
@@ -218,37 +264,62 @@ def submit(node):
 
     ##### DIR MAP MARVIN #####
     job.newDirMap(src="I:/SynologyDrive/ARAL", dst="/marvin/ARAL", zone="NFS")
-    job.newDirMap(src="I:/SynologyDrive/CLAIR_DE_LUNE", dst="/marvin/CLAIR_DE_LUNE", zone="NFS")
-    job.newDirMap(src="I:/SynologyDrive/FORGOT_YOUR_PASSWORD", dst="/marvin/FORGOT_YOUR_PASSWORD", zone="NFS")
-    job.newDirMap(src="I:/SynologyDrive/LOREE", dst="/marvin/LOREE", zone="NFS")
-    job.newDirMap(src="I:/SynologyDrive/RESURGENCE", dst="/marvin/RESURGENCE", zone="NFS")
-    job.newDirMap(src="I:/SynologyDrive/TIMES_DOWN", dst="/marvin/TIMES_DOWN", zone="NFS")
+    job.newDirMap(src="I:/SynologyDrive/CLAIR_DE_LUNE",
+                  dst="/marvin/CLAIR_DE_LUNE", zone="NFS")
+    job.newDirMap(src="I:/SynologyDrive/FORGOT_YOUR_PASSWORD",
+                  dst="/marvin/FORGOT_YOUR_PASSWORD", zone="NFS")
+    job.newDirMap(src="I:/SynologyDrive/LOREE",
+                  dst="/marvin/LOREE", zone="NFS")
+    job.newDirMap(src="I:/SynologyDrive/RESURGENCE",
+                  dst="/marvin/RESURGENCE", zone="NFS")
+    job.newDirMap(src="I:/SynologyDrive/TIMES_DOWN",
+                  dst="/marvin/TIMES_DOWN", zone="NFS")
 
     ##### DIR MAP TARS #####
-    job.newDirMap(src="I:/SynologyDrive/ASCEND", dst="/tars/ASCEND", zone="NFS")
-    job.newDirMap(src="I:/SynologyDrive/ISSEN_SAMA", dst="/tars/ISSEN_SAMA", zone="NFS")
+    job.newDirMap(src="I:/SynologyDrive/ASCEND",
+                  dst="/tars/ASCEND", zone="NFS")
+    job.newDirMap(src="I:/SynologyDrive/ISSEN_SAMA",
+                  dst="/tars/ISSEN_SAMA", zone="NFS")
     job.newDirMap(src="I:/SynologyDrive/LONE", dst="/tars/LONE", zone="NFS")
-    job.newDirMap(src="I:/SynologyDrive/MOON_KEEPER", dst="/tars/MOON_KEEPER", zone="NFS")
+    job.newDirMap(src="I:/SynologyDrive/MOON_KEEPER",
+                  dst="/tars/MOON_KEEPER", zone="NFS")
 
     ##### DIR MAP ANA #####
     job.newDirMap(src="I:/SynologyDrive/BREACH", dst="/ana/BREACH", zone="NFS")
     job.newDirMap(src="I:/SynologyDrive/HARU", dst="/ana/HARU", zone="NFS")
     job.newDirMap(src="I:/SynologyDrive/VERLAN", dst="/ana/VERLAN", zone="NFS")
 
+    if inputs == ():
+        for i in range(int(start), int(end + 1), frames_per_task):
+            task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(C:/Houdini17/bin/hrender.py)",
+                            "%D({file_path})".format(file_path=file_path), "-d", output_driver]
+            task_command.extend(["-e", "-f", str(i), str(i + frames_per_task - 1)])
+            task_name = "frame {start}-{end}".format(
+                start=str(i), end=str(i + frames_per_task - 1))
+            # print(task_command)
+            task = author.Task(
+                title=task_name, argv=task_command, service=str(service))
+            job.addChild(task)
+    else:
+        for j in range(len(inputs)):
+            driver = inputs[j]
+            parent = author.Task(title=driver.name())
+            job.addChild(parent)
+            for i in range(int(start), int(end + 1), frames_per_task):
+                task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(C:/Houdini17/bin/hrender.py)",
+                                "%D({file_path})".format(file_path=file_path), "-d", driver.path()]
+                task_command.extend(["-e", "-f", str(i), str(i + frames_per_task - 1)])
+                task_name = "{driver} frame {start}-{end}".format(
+                    driver=driver.name(), start=str(i), end=str(i + frames_per_task - 1))
+                # print(task_command)
+                task = author.Task(
+                    title=task_name, argv=task_command, service=str(service))
+                parent.addChild(task)
 
-    for i in range(int(start), int(end+1), frames_per_task):
-        task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(C:/Houdini17/bin/hrender.py)", "%D({file_path})".format(file_path=file_path), "-d", output_driver]
-        task_command.extend(["-e", "-f", str(i), str(i+frames_per_task-1)])
-        task_name = "frame {start}-{end}".format(start=str(i), end=str(i+frames_per_task-1))
-        #print(task_command)
-        task = author.Task(title=task_name, argv=task_command, service=str(service))
-        job.addChild(task)
-
-    #print(job.asTcl())
+    # print(job.asTcl())
     newJid = job.spool()
 
     hou.hipFile.load(file, suppress_save_prompt=True)
 
     hou.ui.displayMessage('Scene was submitted as {}'.format(new_name_path), buttons=('OK',),
                           severity=hou.severityType.Message)
-
