@@ -49,6 +49,8 @@ def submit(node):
 
     file = hou.hipFile.name()
 
+    farm_project = node.parm("project").evalAsString()
+
     job_name = node.parm("job_name").evalAsString(
     ) or hou.expandString('$FARM')
     output_driver = node.parm("output_driver").evalAsString()
@@ -70,10 +72,10 @@ def submit(node):
     rooms = [token for n, token in enumerate(
         rooms_tokens) if rooms_bitfield & (1 << n)]
 
-    teams_bitfield = node.parm("teams").eval()
-    teams_tokens = node.parm("teams").parmTemplate().menuItems()
-    teams = [token for n, token in enumerate(
-        teams_tokens) if teams_bitfield & (1 << n)]
+    # teams_bitfield = node.parm("teams").eval()
+    # teams_tokens = node.parm("teams").parmTemplate().menuItems()
+    # teams = [token for n, token in enumerate(
+    #     teams_tokens) if teams_bitfield & (1 << n)]
 
     current_project = os.path.basename(hou.expandString('$PROJECT'))
     current_server = project_server.get(current_project)
@@ -87,41 +89,17 @@ def submit(node):
 
     file_path = file
 
-    service_rooms = " || ".join(rooms)
-    service_teams = " || ".join(teams)
+    # service_rooms = " || ".join(rooms)
+    # service_teams = " || ".join(teams)
 
     if simu == 0:
         service = None
         if ram == 0:
-            if len(rooms) > 0 and len(teams) > 0:
-                service = '(({rooms}) && ram_32) || ({teams})'.format(
-                    rooms=service_rooms, teams=service_teams)
-            elif len(rooms) > 0:
-                service = '({rooms}) && ram_32'.format(
-                    rooms=service_rooms, teams=service_teams)
-            elif len(teams) > 0:
-                service = '{teams}'.format(
-                    rooms=service_rooms, teams=service_teams)
+            service = "render && ram_32"
         elif ram == 1:
-            if len(rooms) > 0 and len(teams) > 0:
-                service = '(({rooms}) && !ram_32) || ({teams})'.format(
-                    rooms=service_rooms, teams=service_teams)
-            elif len(rooms) > 0:
-                service = '({rooms}) && !ram_32'.format(
-                    rooms=service_rooms, teams=service_teams)
-            elif len(teams) > 0:
-                service = '{teams}'.format(
-                    rooms=service_rooms, teams=service_teams)
+            service = "render && !ram_32"
         else:
-            if len(rooms) > 0 and len(teams) > 0:
-                service = '({rooms}) || ({teams})'.format(
-                    rooms=service_rooms, teams=service_teams)
-            elif len(rooms) > 0:
-                service = '{rooms}'.format(
-                    rooms=service_rooms, teams=service_teams)
-            elif len(teams) > 0:
-                service = '{teams}'.format(
-                    rooms=service_rooms, teams=service_teams)
+            service = "render"
 
         if not service:
             hou.ui.displayMessage('Please check your submission settings.', buttons=('OK',),
@@ -211,7 +189,7 @@ def submit(node):
     if simu and service == 'simu':
         file_path = file_path.replace(root_path, root_path_linux)
 
-    job = author.Job(title=job_name, priority=100, service=str(service))
+    job = author.Job(title=job_name, priority=100, service=str(service), projects=[farm_project], tags=["theWholeFarm"])
 
     # job.newDirMap(src="I:/SynologyDrive/A_PIPE", dst="//marvin/PFE_RN_2020/A_PIPE", zone="UNC")
     job.newDirMap(src="I:/SynologyDrive/A_PIPE",

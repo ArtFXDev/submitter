@@ -19,7 +19,29 @@ import tractor.api.author as author
 
 rams = ["All ram", "ram_32", "ram_lower"]
 projects = ["aral", "ascend", "breach", "clair_de_lune", "fyp", "haru", "issen_sama",
-            "lone", "loree", "moon_keeper", "resurgence", "times_down", "verlan"]
+            "lone", "loree", "moon_keeper", "resurgence", "times_down", "verlan", "TD"]
+
+
+project_server = {
+
+    'A_PIPE': 'marvin',
+    'ARAL': 'marvin',
+    'CLAIR_DE_LUNE': 'marvin',
+    'FORGOT_YOUR_PASSWORD': 'marvin',
+    'LOREE': 'marvin',
+    'RESURGENCE': 'marvin',
+    'TIMES_DOWN': 'marvin',
+
+    'ASCEND': 'tars',
+    'ISSEN_SAMA': 'tars',
+    'LONE': 'tars',
+    'MOON_KEEPER': 'tars',
+
+    'BREACH': 'ana',
+    'HARU': 'ana',
+    'VERLAN': 'ana'
+
+}
 
 
 class SubmitterMaya(QtWidgets.QMainWindow):
@@ -86,6 +108,7 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         if len(projects_selected) != 0:
             services = "((" + services + ") || (" + \
                 str(' || '.join(projects_selected)) + "))"
+
         print("Render on : " + services)
 
         job = author.Job(title=job_name, priority=100, service=services)
@@ -127,6 +150,9 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         job.newDirMap(src="I:/SynologyDrive/VERLAN",
                       dst="//ana/PFE_RN_2020/VERLAN", zone="UNC")
 
+        proj_name = file_path.split('/')[2]
+        serv_name = project_server[proj_name]
+        print "serv : ", serv_name
         # job.newDirMap(src="I:/SynologyDrive", dst="//marvin/PFE_RN_2020", zone="NFS")
         # print 'range', range(start, end, frames_per_task)
         try:
@@ -136,9 +162,11 @@ class SubmitterMaya(QtWidgets.QMainWindow):
                     "-r", "file",
                     "-s", "{start}".format(start=str(start)),
                     "-e", "{end}".format(end=str(end)),
+                    "-preRender", 'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
+                    serv_name + '/PFE_RN_2020/";',
                     "-proj", "%D({proj})".format(proj=proj),
                     "%D({file_path})".format(file_path=file_path)]
-
+                # "-preRender", 'dirmap -en true; dirmap -m "I:\\SynologyDrive\\" "//' + serv_name + '/PFE_RN_2020/";',
                 task_name = "frame {start}-{end}".format(
                     start=str(i), end=str(i + frames_per_task - 1))
 
