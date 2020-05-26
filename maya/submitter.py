@@ -19,7 +19,7 @@ import tractor.api.author as author
 
 rams = ["All ram", "ram_32", "ram_lower"]
 projects = ["aral", "ascend", "breach", "clair_de_lune", "fyp", "haru", "issen_sama",
-            "lone", "loree", "moon_keeper", "resurgence", "times_down", "verlan", "TD"]
+            "lone", "loree", "moon_keeper", "resurgence", "times_down", "verlan"]
 
 
 project_server = {
@@ -95,19 +95,17 @@ class SubmitterMaya(QtWidgets.QMainWindow):
 
         file_path = cmds.file(query=True, sceneName=True)
 
+        path = cmds.file(query=True, sceneName=True).replace(os.sep, '/')
+        if '/scenes' not in path:
+            raise Exception('Pas de project Maya (/scenes)')
+        proj = path.split('/scenes')[0]
+        proj = proj.replace('I:/SynologyDrive/', '//tars/PFE_RN_2020/')
+
         services = "(" + " || ".join(projects_selected) + ")"
         if ram_selected == "ram_lower":
             services = services + " && !ram_32"
         elif ram_selected == "ram_32":
-<<<<<<< Updated upstream
-            services = "(" + services + ") && ram_32"
-        if len(projects_selected) != 0:
-            services = "((" + services + ") || (" + \
-                str(' || '.join(projects_selected)) + "))"
-
-=======
             services = services + " && ram_32"
->>>>>>> Stashed changes
         print("Render on : " + services)
 
         job = author.Job(title=job_name, priority=100, service=services)

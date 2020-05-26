@@ -650,20 +650,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Salles : </string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QListWidget" name="list_salle">
-         <property name="minimumSize">
-          <size>
-           <width>150</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="selectionMode">
-          <enum>QAbstractItemView::MultiSelection</enum>
+          <string>Ram : </string>
          </property>
         </widget>
        </item>
