@@ -67,10 +67,12 @@ def submit(node):
     ram = node.parm("ram").evalAsInt()
     gpu = node.parm("gpu").evalAsInt()
 
-    rooms_bitfield = node.parm("rooms").eval()
-    rooms_tokens = node.parm("rooms").parmTemplate().menuItems()
-    rooms = [token for n, token in enumerate(
-        rooms_tokens) if rooms_bitfield & (1 << n)]
+    farmType = node.parm("farmType").evalAsInt();
+
+    pools_bitfield = node.parm("pools").eval()
+    pools_tokens = node.parm("pools").parmTemplate().menuItems()
+    pools = [token for n, token in enumerate(
+        pools_tokens) if pools_bitfield & (1 << n)]
 
     # teams_bitfield = node.parm("teams").eval()
     # teams_tokens = node.parm("teams").parmTemplate().menuItems()
@@ -94,22 +96,17 @@ def submit(node):
 
     if simu == 0:
         service = None
-        if ram == 0:
-            service = "render && ram_32"
-        elif ram == 1:
-            service = "render && !ram_32"
+        if farmType == 0:
+            service = "({pools})".format(pools=" || ".join(pools))
+
+
         else:
-            service = "render"
+            service = "gpu"
 
         if not service:
             hou.ui.displayMessage('Please check your submission settings.', buttons=('OK',),
-                                  severity=hou.severityType.Warning)
+            severity=hou.severityType.Warning)
             return
-        else:
-            if gpu == 0:
-                service += " && gpu"
-            elif gpu == 1:
-                service += " && !gpu"
 
         for var, env_job in [(v, hou.getenv(v)) for v in envs]:
             if not env_job:
@@ -189,7 +186,7 @@ def submit(node):
     if simu and service == 'simu':
         file_path = file_path.replace(root_path, root_path_linux)
 
-    job = author.Job(title=job_name, priority=100, service=str(service), projects=[farm_project], tags=["theWholeFarm"])
+    job = author.Job(title=job_name, priority=100, service=str(service), projects=[farm_project])
 
     # job.newDirMap(src="I:/SynologyDrive/A_PIPE", dst="//marvin/PFE_RN_2020/A_PIPE", zone="UNC")
     job.newDirMap(src="I:/SynologyDrive/A_PIPE",

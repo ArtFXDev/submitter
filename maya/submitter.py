@@ -60,8 +60,6 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         self.input_frame_end.setText('2')
         for project in projects:
             self.list_project.addItem(project)
-        for salle in projects:
-            self.list_salle.addItem(salle)
         for ram in rams:
             self.cb_ram.addItem(ram)
 
@@ -77,16 +75,13 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         job_name = str(self.input_job_name.text())
         increment = int(self.input_frame_increment.text())
         frames_per_task = int(self.input_frame_per_task.text())
-        salles_selected = []
         projects_selected = []
         ram_selected = self.cb_ram.currentText()
         proj = cmds.file(query=True, sceneName=True).replace(
             os.sep, '/').split('/scenes')[0]
-        print 'Project : ', proj
-        for select in self.list_salle.selectedItems():
-            salles_selected.append("p_" + select.text())
+
         for project in self.list_project.selectedItems():
-            projects_selected.append(project.text())
+            projects_selected.append("p_" + str(project.text()).lower())
         if self.rb_frame.isChecked():
             start = int(cmds.currentTime(query=True))
             end = int(cmds.currentTime(query=True)) + 1
@@ -100,15 +95,19 @@ class SubmitterMaya(QtWidgets.QMainWindow):
 
         file_path = cmds.file(query=True, sceneName=True)
 
-        services = str(" || ".join(salles_selected))
+        services = "(" + " || ".join(projects_selected) + ")"
         if ram_selected == "ram_lower":
-            services = "(" + services + ") && !ram_32"
+            services = services + " && !ram_32"
         elif ram_selected == "ram_32":
+<<<<<<< Updated upstream
             services = "(" + services + ") && ram_32"
         if len(projects_selected) != 0:
             services = "((" + services + ") || (" + \
                 str(' || '.join(projects_selected)) + "))"
 
+=======
+            services = services + " && ram_32"
+>>>>>>> Stashed changes
         print("Render on : " + services)
 
         job = author.Job(title=job_name, priority=100, service=services)
