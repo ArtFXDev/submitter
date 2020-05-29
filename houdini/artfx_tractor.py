@@ -66,6 +66,7 @@ def submit(node):
     simu = node.parm("simu").evalAsInt()
     ram = node.parm("ram").evalAsInt()
     gpu = node.parm("gpu").evalAsInt()
+    gpu64 = node.parm("gpu_ram").evalAsInt()
 
     farmType = node.parm("farmType").evalAsInt();
 
@@ -101,7 +102,12 @@ def submit(node):
 
 
         else:
-            service = "gpu"
+            if(gpu64 == 0):
+                service = "gpu && !gpu64"
+            elif(gpu64 == 1):
+                service = "gpu64"
+            else:
+                service = "gpu"
 
         if not service:
             hou.ui.displayMessage('Please check your submission settings.', buttons=('OK',),
