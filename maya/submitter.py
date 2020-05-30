@@ -99,7 +99,6 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         if '/scenes' not in path:
             raise Exception('Pas de project Maya (/scenes)')
         proj = path.split('/scenes')[0]
-        proj = proj.replace('I:/SynologyDrive/', '//tars/PFE_RN_2020/')
 
         services = "(" + " || ".join(projects_selected) + ")"
         if ram_selected == "ram_lower":
