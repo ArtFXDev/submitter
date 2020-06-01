@@ -152,16 +152,35 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         # job.newDirMap(src="I:/SynologyDrive", dst="//marvin/PFE_RN_2020", zone="NFS")
         # print 'range', range(start, end, frames_per_task)
         try:
-            for i in range(start, end, frames_per_task):
-                task_command = [
-                    "C:/Maya2019/bin/Render.exe",
-                    "-r", "file",
-                    "-s", "{start}".format(start=str(start)),
-                    "-e", "{end}".format(end=str(end)),
-                    "-preRender", 'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
-                    serv_name + '/PFE_RN_2020/";',
-                    "-proj", "%D({proj})".format(proj=proj),
-                    "%D({file_path})".format(file_path=file_path)]
+            if frames_per_task > (end - start):
+                frames_per_task = (end - start + 1)
+            for i in range(start, end + 1, frames_per_task):
+                if (i + frames_per_task - 1) < end:
+                    task_name = "frame {start}-{end}".format(
+                        start=str(i), end=str(i + frames_per_task - 1))
+                else:
+                    task_name = "frame {start}-{end}".format(
+                        start=str(i), end=str(end))
+                if (i + frames_per_task - 1) < end:
+                    task_command = [
+                        "C:/Maya2019/bin/Render.exe",
+                        "-r", "file",
+                        "-s", "{start}".format(start=str(i)),
+                        "-e", "{end}".format(end=str(i + frames_per_task - 1)),
+                        "-preRender", 'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
+                        serv_name + '/PFE_RN_2020/";',
+                        "-proj", "%D({proj})".format(proj=proj),
+                        "%D({file_path})".format(file_path=file_path)]
+                else:
+                    task_command = [
+                        "C:/Maya2019/bin/Render.exe",
+                        "-r", "file",
+                        "-s", "{start}".format(start=str(i)),
+                        "-e", "{end}".format(end=str(end)),
+                        "-preRender", 'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
+                        serv_name + '/PFE_RN_2020/";',
+                        "-proj", "%D({proj})".format(proj=proj),
+                        "%D({file_path})".format(file_path=file_path)]
                 # "-preRender", 'dirmap -en true; dirmap -m "I:\\SynologyDrive\\" "//' + serv_name + '/PFE_RN_2020/";',
                 task_name = "frame {start}-{end}".format(
                     start=str(i), end=str(i + frames_per_task - 1))
