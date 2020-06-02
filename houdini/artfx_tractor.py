@@ -285,7 +285,7 @@ def submit(node):
     if inputs == ():
         # for i in range(int(start), int(end + 1), frames_per_task):
         for i in range(0, len(frame_set.items) , frames_per_task):
-            task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(//marvin/PFE_RN_2020/_UTILITY/04_FARM/01_HOUDINI/hrender_art.py)",
+            task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(//marvin/PFE_RN_2020/_UTILITY/04_FARM/01_HOUDINI/hrender_artfx.py)",
                             "%D({file_path})".format(file_path=file_path), "-d", output_driver]
             task_command.extend(["-F"])
             task_name = "frame"
@@ -304,7 +304,7 @@ def submit(node):
             parent = author.Task(title=driver.name())
             job.addChild(parent)
             for i in range(0, len(frame_set.items) , frames_per_task):
-                task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(//marvin/PFE_RN_2020/_UTILITY/04_FARM/01_HOUDINI/hrender_art.py)",
+                task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(//marvin/PFE_RN_2020/_UTILITY/04_FARM/01_HOUDINI/hrender_artfx.py)",
                                 "%D({file_path})".format(file_path=file_path), "-d", driver.path()]
                 task_command.extend(["-F"])
                 task_name = "{driver} frame".format(driver=driver.name())
