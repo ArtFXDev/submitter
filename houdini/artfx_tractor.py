@@ -69,9 +69,6 @@ def submit(node):
 
     frames = node.parm("frames").evalAsString()
     frame_set = fileseq.FrameSet(frames)
-    print(frame_set)
-    print(frame_set.frange)
-    print(frame_set.items)
 
     # increment = node.parm("f3").evalAsFloat()
     nbFrames = int(end) - int(start)
@@ -293,9 +290,10 @@ def submit(node):
             task_command.extend(["-F"])
             task_name = "frame"
             for j in range(frames_per_task):
-                f = str(list(frame_set.items)[i+j])
-                task_command.extend([f])
-                task_name += " {f}".format(f=f)
+                if((i+j) < len(frame_set.items)):
+                    f = str(list(frame_set.items)[i+j])
+                    task_command.extend([f])
+                    task_name += " {f}".format(f=f)
 
             task = author.Task(
                 title=task_name, argv=task_command, service=str(service))
@@ -311,9 +309,10 @@ def submit(node):
                 task_command.extend(["-F"])
                 task_name = "{driver} frame".format(driver=driver.name())
                 for j in range(frames_per_task):
-                    f = str(list(frame_set.items)[i+j])
-                    task_command.extend([f])
-                    task_name += " {f}".format(f=f)
+                    if((i+j) < len(frame_set.items)):
+                        f = str(list(frame_set.items)[i+j])
+                        task_command.extend([f])
+                        task_name += " {f}".format(f=f)
 
                 task = author.Task(
                     title=task_name, argv=task_command, service=str(service))
