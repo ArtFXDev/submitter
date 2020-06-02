@@ -19,7 +19,7 @@ import tractor.api.author as author
 
 rams = ["All ram", "ram_32", "ram_lower"]
 projects = ["aral", "ascend", "breach", "clair_de_lune", "fyp", "haru", "issen_sama",
-            "lone", "loree", "moon_keeper", "resurgence", "times_down", "verlan", "rack"]
+            "lone", "loree", "moon_keeper", "depths", "times_down", "verlan", "rack"]
 
 
 project_server = {
