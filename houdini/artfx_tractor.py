@@ -15,6 +15,13 @@ for path in paths:
 
 import tractor.api.author as author
 
+parent_dir = os.path.abspath(os.path.dirname(__file__))
+vendor_dir = os.path.join(parent_dir, 'vendor')
+if vendor_dir not in sys.path:
+    sys.path.append(vendor_dir)
+
+import fileseq
+
 envs = ['JOB', 'WIPCACHE', 'PUBCACHE', 'ASSET', 'SHOT',
         'PROJECT', 'IMAGES_OUT']  # Hou env variables
 
@@ -59,10 +66,18 @@ def submit(node):
 
     start = node.parm("f1").evalAsFloat()
     end = node.parm("f2").evalAsFloat()
+
+    frames = node.parm("frames").evalAsString()
+    frame_set = fileseq.FrameSet(frames)
+    print(frame_set)
+    print(frame_set.frange)
+    print(frame_set.items)
+
     # increment = node.parm("f3").evalAsFloat()
     nbFrames = int(end) - int(start)
-    frames_per_task = int(
-        ceil((nbFrames) / node.parm("frames_task").evalAsInt())) + 1
+    # frames_per_task = int(
+    #     ceil((nbFrames) / node.parm("frames_task").evalAsInt())) + 1
+    frames_per_task = node.parm("frames_task").evalAsInt()
     simu = node.parm("simu").evalAsInt()
     ram = node.parm("ram").evalAsInt()
     gpu = node.parm("gpu").evalAsInt()
@@ -271,13 +286,17 @@ def submit(node):
     job.newDirMap(src="I:/SynologyDrive/VERLAN", dst="/ana/VERLAN", zone="NFS")
 
     if inputs == ():
-        for i in range(int(start), int(end + 1), frames_per_task):
-            task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(C:/Houdini17/bin/hrender.py)",
+        # for i in range(int(start), int(end + 1), frames_per_task):
+        for i in range(0, len(frame_set.items) , frames_per_task):
+            task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(//marvin/PFE_RN_2020/_UTILITY/04_FARM/01_HOUDINI/hrender_art.py)",
                             "%D({file_path})".format(file_path=file_path), "-d", output_driver]
-            task_command.extend(["-e", "-f", str(i), str(i + frames_per_task - 1)])
-            task_name = "frame {start}-{end}".format(
-                start=str(i), end=str(i + frames_per_task - 1))
-            # print(task_command)
+            task_command.extend(["-F"])
+            task_name = "frame"
+            for j in range(frames_per_task):
+                f = str(list(frame_set.items)[i+j])
+                task_command.extend([f])
+                task_name += " {f}".format(f=f)
+
             task = author.Task(
                 title=task_name, argv=task_command, service=str(service))
             job.addChild(task)
@@ -286,16 +305,29 @@ def submit(node):
             driver = inputs[j]
             parent = author.Task(title=driver.name())
             job.addChild(parent)
-            for i in range(int(start), int(end + 1), frames_per_task):
-                task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(C:/Houdini17/bin/hrender.py)",
+            for i in range(0, len(frame_set.items) , frames_per_task):
+                task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(//marvin/PFE_RN_2020/_UTILITY/04_FARM/01_HOUDINI/hrender_art.py)",
                                 "%D({file_path})".format(file_path=file_path), "-d", driver.path()]
-                task_command.extend(["-e", "-f", str(i), str(i + frames_per_task - 1)])
-                task_name = "{driver} frame {start}-{end}".format(
-                    driver=driver.name(), start=str(i), end=str(i + frames_per_task - 1))
-                # print(task_command)
+                task_command.extend(["-F"])
+                task_name = "{driver} frame".format(driver=driver.name())
+                for j in range(frames_per_task):
+                    f = str(list(frame_set.items)[i+j])
+                    task_command.extend([f])
+                    task_name += " {f}".format(f=f)
+
                 task = author.Task(
                     title=task_name, argv=task_command, service=str(service))
-                parent.addChild(task)
+                job.addChild(task)
+            # for i in range(int(start), int(end + 1), frames_per_task):
+            #     task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(C:/Houdini17/bin/hrender.py)",
+            #                     "%D({file_path})".format(file_path=file_path), "-d", driver.path()]
+            #     task_command.extend(["-e", "-f", str(i), str(i + frames_per_task - 1)])
+            #     task_name = "{driver} frame {start}-{end}".format(
+            #         driver=driver.name(), start=str(i), end=str(i + frames_per_task - 1))
+            #     # print(task_command)
+            #     task = author.Task(
+            #         title=task_name, argv=task_command, service=str(service))
+            #     parent.addChild(task)
 
     # print(job.asTcl())
     newJid = job.spool()
