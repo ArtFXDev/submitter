@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>242</height>
+    <width>502</width>
+    <height>243</height>
    </rect>
   </property>
   <property name="palette">
@@ -471,6 +471,13 @@
        <property name="spacing">
         <number>0</number>
        </property>
+       <item row="6" column="0">
+        <widget class="QPushButton" name="bt_render">
+         <property name="text">
+          <string>RENDER</string>
+         </property>
+        </widget>
+       </item>
        <item row="0" column="0">
         <widget class="QWidget" name="widget_2" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -492,31 +499,23 @@
          </layout>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QFrame" name="frame">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout">
+       <item row="3" column="0">
+        <widget class="QWidget" name="widget_frame_per_task" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <widget class="QRadioButton" name="rb_frame">
-            <property name="text">
-             <string>Current frame</string>
+           <widget class="QLabel" name="label_4">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
             </property>
-            <property name="checked">
-             <bool>true</bool>
+            <property name="text">
+             <string>Frame per Task :</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="rb_frame_range">
-            <property name="text">
-             <string>Frame range</string>
-            </property>
-           </widget>
+           <widget class="QLineEdit" name="input_frame_per_task"/>
           </item>
          </layout>
         </widget>
@@ -562,32 +561,62 @@
          </layout>
         </widget>
        </item>
-       <item row="3" column="0">
-        <widget class="QWidget" name="widget_frame_per_task" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item row="1" column="0">
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QLabel" name="label_4">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
+           <widget class="QRadioButton" name="rb_frame">
             <property name="text">
-             <string>Frame per Task :</string>
+             <string>Current frame</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="input_frame_per_task"/>
+           <widget class="QRadioButton" name="rb_frame_range">
+            <property name="text">
+             <string>Frame range</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
        </item>
-       <item row="4" column="0">
-        <widget class="QPushButton" name="bt_render">
-         <property name="text">
-          <string>RENDER</string>
+       <item row="5" column="0">
+        <widget class="QFrame" name="frame_2">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
          </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QRadioButton" name="rb_render_defaut">
+            <property name="text">
+             <string>Defaut</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="rb_render_redshift">
+            <property name="text">
+             <string>Redshift</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>

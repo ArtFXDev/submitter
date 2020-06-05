@@ -148,6 +148,10 @@ class SubmitterMaya(QtWidgets.QMainWindow):
 
         proj_name = file_path.split('/')[2]
         serv_name = project_server[proj_name]
+        proj = proj.replace("I:/SynologyDrive/",
+                            "//" + serv_name + "/PFE_RN_2020/")
+        file_path = file_path.replace(
+            "I:/SynologyDrive/", "//" + serv_name + "/PFE_RN_2020/")
         print "serv : ", serv_name
         # job.newDirMap(src="I:/SynologyDrive", dst="//marvin/PFE_RN_2020", zone="NFS")
         # print 'range', range(start, end, frames_per_task)
@@ -167,8 +171,8 @@ class SubmitterMaya(QtWidgets.QMainWindow):
                         "-r", "file",
                         "-s", "{start}".format(start=str(i)),
                         "-e", "{end}".format(end=str(i + frames_per_task - 1)),
-                        "-preRender", 'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
-                        serv_name + '/PFE_RN_2020/";',
+                        "-preRender", '\'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
+                        serv_name + '/PFE_RN_2020/";\'',
                         "-proj", "%D({proj})".format(proj=proj),
                         "%D({file_path})".format(file_path=file_path)]
                 else:
@@ -177,16 +181,19 @@ class SubmitterMaya(QtWidgets.QMainWindow):
                         "-r", "file",
                         "-s", "{start}".format(start=str(i)),
                         "-e", "{end}".format(end=str(end)),
-                        "-preRender", 'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
-                        serv_name + '/PFE_RN_2020/";',
-                        "-proj", "%D({proj})".format(proj=proj),
-                        "%D({file_path})".format(file_path=file_path)]
-                # "-preRender", 'dirmap -en true; dirmap -m "I:\\SynologyDrive\\" "//' + serv_name + '/PFE_RN_2020/";',
+                        "-preRender", '\'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
+                        serv_name + '/PFE_RN_2020/";\'',
+                        "-proj", "{proj}".format(proj=proj),
+                        "{file_path}".format(file_path=file_path)]
+                if self.rb_render_redshift.isChecked():
+                    task_command.insert(
+                        0, "cmd.exe /c SET MAYA_PLUG_IN_PATH=C:/programdata/redshift && ")
+
                 task_name = "frame {start}-{end}".format(
                     start=str(i), end=str(i + frames_per_task - 1))
 
                 task = author.Task(
-                    title=task_name, argv=task_command, service=services)
+                    title=task_name, argv=" ".join(task_command), service=services)
                 job.addChild(task)
 
             # print(job.asTcl())
