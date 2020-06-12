@@ -282,6 +282,8 @@ def submit(node):
     job.newDirMap(src="I:/SynologyDrive/HARU", dst="/ana/HARU", zone="NFS")
     job.newDirMap(src="I:/SynologyDrive/VERLAN", dst="/ana/VERLAN", zone="NFS")
 
+    job.newDirMap(src="//marvin/PFE_RN_2020", dst="/marvin", zone="NFS")
+
     if inputs == ():
         # for i in range(int(start), int(end + 1), frames_per_task):
         for i in range(0, len(frame_set.items), 1 if len(frame_set.items) == frames_per_task else (len(frame_set.items) // frames_per_task) + 1):
