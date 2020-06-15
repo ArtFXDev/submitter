@@ -181,31 +181,12 @@ class SubmitterMaya(QtWidgets.QMainWindow):
                         "-e", "{end}".format(end=str(end)),
                         "-proj", "{proj}".format(proj=proj),
                         "{file_path}".format(file_path=file_path)]
-                if self.rb_render_redshift.isChecked():
-                    task_command.insert(0, "&&")
-                    task_command.insert(0, """SET REDSHIFT_COREDATAPATH=C:/ProgramData/Redshift
-                        && SET REDSHIFT_PLUG_IN_PATH=%REDSHIFT_COREDATAPATH%/Plugins/Maya/2019/nt-x86-64
-                        && SET REDSHIFT_SCRIPT_PATH=%REDSHIFT_COREDATAPATH%/Plugins/Maya/Common/scripts
-                        && SET REDSHIFT_XBMLANGPATH=%REDSHIFT_COREDATAPATH%/Plugins/Maya/Common/icons
-                        && SET REDSHIFT_RENDER_DESC_PATH=%REDSHIFT_COREDATAPATH%/Plugins/Maya/Common/rendererDesc
-                        && SET REDSHIFT_CUSTOM_TEMPLATE_PATH=%REDSHIFT_COREDATAPATH%/Plugins/Maya/Common/scripts/NETemplates
-                        && SET REDSHIFT_MAYAEXTENSIONSPATH=%REDSHIFT_PLUG_IN_PATH%/extensions
-                        && SET REDSHIFT_PROCEDURALSPATH=%REDSHIFT_COREDATAPATH%/Procedurals
-                        && SET MAYA_PLUG_IN_PATH=%REDSHIFT_PLUG_IN_PATH%
-                        && SET MAYA_SCRIPT_PATH=%REDSHIFT_SCRIPT_PATH%
-                        && SET PYTHONPATH=%REDSHIFT_SCRIPT_PATH%
-                        && SET XBMLANGPATH=%REDSHIFT_XBMLANGPATH%
-                        && SET MAYA_RENDER_DESC_PATH=%REDSHIFT_RENDER_DESC_PATH%
-                        && SET MAYA_CUSTOM_TEMPLATE_PATH=%REDSHIFT_CUSTOM_TEMPLATE_PATH%
-                        && SET PATH=%REDSHIFT_COREDATAPATH%/bin
-                    """)
-                    task_command.insert(0, "cmd.exe /c")
 
                 task_name = "frame {start}-{end}".format(
                     start=str(i), end=str(i + frames_per_task - 1))
 
                 task = author.Task(
-                    title=task_name, argv=" ".join(task_command), service=services)
+                    title=task_name, argv=task_command, service=services)
                 job.addChild(task)
 
             # print(job.asTcl())
