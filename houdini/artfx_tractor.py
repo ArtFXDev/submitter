@@ -285,26 +285,39 @@ def submit(node):
     job.newDirMap(src="//marvin/PFE_RN_2020", dst="/marvin", zone="NFS")
 
     if inputs == ():
-        # for i in range(int(start), int(end + 1), frames_per_task):
-        for i in range(0, len(frame_set.items), 1 if len(frame_set.items) == frames_per_task else (len(frame_set.items) // frames_per_task) + 1):
-            task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(//marvin/PFE_RN_2020/_UTILITY/04_FARM/01_HOUDINI/hrender_artfx.py)",
+        if service == "simu":
+            task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(C:/Houdini17/bin/hrender.py)",
                             "%D({file_path})".format(file_path=file_path), "-d", output_driver]
-            if(service == "simu"):
-                task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(/marvin/_UTILITY/04_FARM/01_HOUDINI/hrender_artfx.py)",
-                                "%D({file_path})".format(file_path=file_path), "-d", output_driver]
-            task_command.extend(["-F"])
-            task_name = "frame"
-            for j in range((len(frame_set.items) // frames_per_task) + 1):
-                if((i+j) < len(frame_set.items)):
-                    l = list(frame_set.items)
-                    l.sort()
-                    f = str(l[i+j])
-                    task_command.extend([f])
-                    task_name += " {f}".format(f=f)
-
+            l = list(frame_set.items)
+            l.sort()
+            task_command.extend(["-e", "-f", str(l[0]), str(l[-1])])
+            task_name = "frame {start}-{end}".format(
+                start=str(l[0]), end=str(l[-1]))
+            # print(task_command)
             task = author.Task(
                 title=task_name, argv=task_command, service=str(service))
             job.addChild(task)
+        else:
+            # for i in range(int(start), int(end + 1), frames_per_task):
+            for i in range(0, len(frame_set.items), 1 if len(frame_set.items) == frames_per_task else (len(frame_set.items) // frames_per_task) + 1):
+                task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(//marvin/PFE_RN_2020/_UTILITY/04_FARM/01_HOUDINI/hrender_artfx.py)",
+                                "%D({file_path})".format(file_path=file_path), "-d", output_driver]
+                if(service == "simu"):
+                    task_command = ["%D(C:/Houdini17/bin/hython.exe)", "%D(/marvin/_UTILITY/04_FARM/01_HOUDINI/hrender_artfx.py)",
+                                    "%D({file_path})".format(file_path=file_path), "-d", output_driver]
+                task_command.extend(["-F"])
+                task_name = "frame"
+                for j in range((len(frame_set.items) // frames_per_task) + 1):
+                    if((i+j) < len(frame_set.items)):
+                        l = list(frame_set.items)
+                        l.sort()
+                        f = str(l[i+j])
+                        task_command.extend([f])
+                        task_name += " {f}".format(f=f)
+
+                task = author.Task(
+                    title=task_name, argv=task_command, service=str(service))
+                job.addChild(task)
     else:
         for j in range(len(inputs)):
             driver = inputs[j]
