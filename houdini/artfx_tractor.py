@@ -76,6 +76,7 @@ def submit(node):
     #     ceil((nbFrames) / node.parm("frames_task").evalAsInt())) + 1
     frames_per_task = node.parm("frames_task").evalAsInt()
     simu = node.parm("simu").evalAsInt()
+    rackLinux = node.parm("rackLinux").evalAsInt()
     ram = node.parm("ram").evalAsInt()
     gpu = node.parm("gpu").evalAsInt()
     gpu64 = node.parm("gpu_ram").evalAsInt()
@@ -107,7 +108,7 @@ def submit(node):
     # service_rooms = " || ".join(rooms)
     # service_teams = " || ".join(teams)
 
-    if simu == 0:
+    if simu == 0 and rackLinux == 0:
         service = None
         if farmType == 0:
             service = "({pools})".format(pools=" || ".join(pools))
@@ -142,8 +143,12 @@ def submit(node):
             project=current_project, server=current_server)
 
     else:
-        service = "simu"
-        author.setEngineClientParam(user="hquser")
+        if rackLinux == 0:
+            service = "simu"
+            author.setEngineClientParam(user="hquser")
+        else:
+            service = "rackLinux"
+            author.setEngineClientParam(user="artfx")
 
         for var, env_job in [(v, hou.getenv(v)) for v in envs]:
             if not env_job:
