@@ -171,8 +171,8 @@ class SubmitterMaya(QtWidgets.QMainWindow):
                         "-r", "redshift" if self.rb_render_redshift.isChecked() else "file",
                         "-s", "{start}".format(start=str(i)),
                         "-e", "{end}".format(end=str(i + frames_per_task - 1)),
-                        "-preRender", '\'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
-                        serv_name + '/PFE_RN_2020/";\'',
+                        "-preRender", 'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
+                        serv_name + '/PFE_RN_2020/";',
                         "-proj", "{proj}".format(proj=proj),
                         "{file_path}".format(file_path=file_path)]
                 else:
@@ -181,8 +181,8 @@ class SubmitterMaya(QtWidgets.QMainWindow):
                         "-r", "redshift" if self.rb_render_redshift.isChecked() else "file",
                         "-s", "{start}".format(start=str(i)),
                         "-e", "{end}".format(end=str(end)),
-                        "-preRender", '\'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
-                        serv_name + '/PFE_RN_2020/";\'',
+                        "-preRender", 'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
+                        serv_name + '/PFE_RN_2020/";',
                         "-proj", "{proj}".format(proj=proj),
                         "{file_path}".format(file_path=file_path)]
 
