@@ -164,6 +164,8 @@ def submit(node):
                 'opchange I:/SynologyDrive/{project} /{server}/{project}'.format(project=project, server=server))
             hou.hscript('opchange //{server}/PFE_RN_2020/{project} /{server}/{project}'.format(
                 project=project, server=server))
+            hou.hscript('opchange //{server}/pfe_rn_2020/{project} /{server}/{project}'.format(
+                project=project, server=server))
 
         root_path_linux = '/{server}/{project}'.format(
             project=current_project, server=current_server)
@@ -288,6 +290,9 @@ def submit(node):
     job.newDirMap(src="I:/SynologyDrive/VERLAN", dst="/ana/VERLAN", zone="NFS")
 
     job.newDirMap(src="//marvin/PFE_RN_2020", dst="/marvin", zone="NFS")
+    job.newDirMap(src="//marvin/pfe_rn_2020", dst="/marvin", zone="NFS")
+    job.newDirMap(src="//ana/PFE_RN_2020", dst="/ana", zone="NFS")
+    job.newDirMap(src="//tars/PFE_RN_2020", dst="/tars", zone="NFS")
 
     if inputs == ():
         if service == "simu":

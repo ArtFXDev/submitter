@@ -18,7 +18,7 @@ for path in paths:
 import tractor.api.author as author
 
 rams = ["All ram", "ram_32", "ram_lower"]
-projects = ["aral", "ascend", "breach", "clair_de_lune", "fyp", "haru", "issen_sama",
+projects = ["rack_linux", "aral", "ascend", "breach", "clair_de_lune", "fyp", "haru", "issen_sama",
             "lone", "loree", "moon_keeper", "depths", "times_down", "verlan", "rack"]
 
 
@@ -80,8 +80,13 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         proj = cmds.file(query=True, sceneName=True).replace(
             os.sep, '/').split('/scenes')[0]
 
+        isRack = False
         for project in self.list_project.selectedItems():
+            if str(project.text()).lower() == "rack_linux":
+                isRack = True
             projects_selected.append("p_" + str(project.text()).lower())
+        if isRack:
+            projects_selected = ["rack_linux"]
         if self.rb_frame.isChecked():
             start = int(cmds.currentTime(query=True))
             end = int(cmds.currentTime(query=True)) + 1
@@ -107,7 +112,15 @@ class SubmitterMaya(QtWidgets.QMainWindow):
             services = services + " && ram_32"
         print("Render on : " + services)
 
+        if isRack:
+            services = "rackLinux"
+            author.setEngineClientParam(user="artfx")
+
         job = author.Job(title=job_name, priority=100, service=services)
+
+        ###########################
+        ##### DIR MAP WINDOWS #####
+        ###########################
 
         job.newDirMap(src="I:/SynologyDrive/A_PIPE",
                       dst="//marvin/PFE_RN_2020/A_PIPE", zone="UNC")
@@ -146,12 +159,60 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         job.newDirMap(src="I:/SynologyDrive/VERLAN",
                       dst="//ana/PFE_RN_2020/VERLAN", zone="UNC")
 
+        #########################
+        ##### DIR MAP LINUX #####
+        #########################
+
+        ##### DIR MAP MARVIN #####
+        job.newDirMap(src="I:/SynologyDrive/ARAL",
+                      dst="/marvin/ARAL", zone="NFS")
+        job.newDirMap(src="I:/SynologyDrive/CLAIR_DE_LUNE",
+                      dst="/marvin/CLAIR_DE_LUNE", zone="NFS")
+        job.newDirMap(src="I:/SynologyDrive/FORGOT_YOUR_PASSWORD",
+                      dst="/marvin/FORGOT_YOUR_PASSWORD", zone="NFS")
+        job.newDirMap(src="I:/SynologyDrive/LOREE",
+                      dst="/marvin/LOREE", zone="NFS")
+        job.newDirMap(src="I:/SynologyDrive/RESURGENCE",
+                      dst="/marvin/RESURGENCE", zone="NFS")
+        job.newDirMap(src="I:/SynologyDrive/TIMES_DOWN",
+                      dst="/marvin/TIMES_DOWN", zone="NFS")
+
+        ##### DIR MAP TARS #####
+        job.newDirMap(src="I:/SynologyDrive/ASCEND",
+                      dst="/tars/ASCEND", zone="NFS")
+        job.newDirMap(src="I:/SynologyDrive/ISSEN_SAMA",
+                      dst="/tars/ISSEN_SAMA", zone="NFS")
+        job.newDirMap(src="I:/SynologyDrive/LONE",
+                      dst="/tars/LONE", zone="NFS")
+        job.newDirMap(src="I:/SynologyDrive/MOON_KEEPER",
+                      dst="/tars/MOON_KEEPER", zone="NFS")
+
+        ##### DIR MAP ANA #####
+        job.newDirMap(src="I:/SynologyDrive/BREACH",
+                      dst="/ana/BREACH", zone="NFS")
+        job.newDirMap(src="I:/SynologyDrive/HARU", dst="/ana/HARU", zone="NFS")
+        job.newDirMap(src="I:/SynologyDrive/VERLAN",
+                      dst="/ana/VERLAN", zone="NFS")
+
+        job.newDirMap(src="//marvin/PFE_RN_2020", dst="/marvin", zone="NFS")
+
+        job.newDirMap(src="C:/Maya2019/bin/Render.exe",
+                      dst="/usr/autodesk/maya/bin/Render", zone="NFS")
+
         proj_name = file_path.split('/')[2]
         serv_name = project_server[proj_name]
-        proj = proj.replace("I:/SynologyDrive/",
-                            "//" + serv_name + "/PFE_RN_2020/")
-        file_path = file_path.replace(
-            "I:/SynologyDrive/", "//" + serv_name + "/PFE_RN_2020/")
+        if isRack:
+            proj = proj.replace("I:/SynologyDrive/", "/%s/" % serv_name)
+            file_path = file_path.replace(
+                "I:/SynologyDrive/", "/%s/" % serv_name)
+            dirmap = 'dirmap -en true; dirmap -m "I:/SynologyDrive/" "/%s/";' % serv_name
+        else:
+            proj = proj.replace("I:/SynologyDrive/",
+                                "//" + serv_name + "/PFE_RN_2020/")
+            file_path = file_path.replace(
+                "I:/SynologyDrive/", "//" + serv_name + "/PFE_RN_2020/")
+            dirmap = 'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' + \
+                serv_name + '/PFE_RN_2020/";'
         print "serv : ", serv_name
         # job.newDirMap(src="I:/SynologyDrive", dst="//marvin/PFE_RN_2020", zone="NFS")
         # print 'range', range(start, end, frames_per_task)
@@ -167,22 +228,20 @@ class SubmitterMaya(QtWidgets.QMainWindow):
                         start=str(i), end=str(end))
                 if (i + frames_per_task - 1) < end:
                     task_command = [
-                        "C:/Maya2019/bin/Render.exe",
+                        "%D(C:/Maya2019/bin/Render.exe)",
                         "-r", "redshift" if self.rb_render_redshift.isChecked() else "file",
                         "-s", "{start}".format(start=str(i)),
                         "-e", "{end}".format(end=str(i + frames_per_task - 1)),
-                        "-preRender", 'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
-                        serv_name + '/PFE_RN_2020/";',
+                        "-preRender", dirmap,
                         "-proj", "{proj}".format(proj=proj),
                         "{file_path}".format(file_path=file_path)]
                 else:
                     task_command = [
-                        "C:/Maya2019/bin/Render.exe",
+                        "%D(C:/Maya2019/bin/Render.exe)",
                         "-r", "redshift" if self.rb_render_redshift.isChecked() else "file",
                         "-s", "{start}".format(start=str(i)),
                         "-e", "{end}".format(end=str(end)),
-                        "-preRender", 'dirmap -en true; dirmap -m "I:/SynologyDrive/" "//' +
-                        serv_name + '/PFE_RN_2020/";',
+                        "-preRender", dirmap,
                         "-proj", "{proj}".format(proj=proj),
                         "{file_path}".format(file_path=file_path)]
 
