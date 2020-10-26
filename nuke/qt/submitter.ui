@@ -631,7 +631,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Projects : </string>
+          <string>Pools</string>
          </property>
         </widget>
        </item>
@@ -644,6 +644,9 @@
        </item>
        <item>
         <widget class="QLabel" name="label_7">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="font">
           <font>
            <pointsize>10</pointsize>
@@ -656,6 +659,9 @@
        </item>
        <item>
         <widget class="QListWidget" name="list_salle">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="minimumSize">
           <size>
            <width>150</width>
@@ -668,7 +674,11 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="cb_ram"/>
+        <widget class="QComboBox" name="cb_ram">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

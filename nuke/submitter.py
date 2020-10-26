@@ -17,9 +17,30 @@ for path in paths:
 
 import tractor.api.author as author
 
+
 rams = ["All ram", "ram_32", "ram_lower"]
-projects = ["aral", "ascend", "breach", "clair_de_lune", "fyp", "haru", "issen_sama",
-            "lone", "loree", "moon_keeper", "resurgence", "times_down", "verlan"]
+projects = ["rack_linux", "Relativity", "Hostile", "Dreamblower", "Backstage", "Cocorica", "From_Above", "Hakam",
+            "Dive", "Green", "Barney", "Pirhearth", "Kitty", "Test_Pipe", "rack"]
+
+
+project_server = {
+
+    'TEST_PIPE': 'ana',
+    'HAKAM': 'ana',
+    'DIVE': 'ana',
+    'GREEN': 'ana',
+    'BARNEY': 'ana',
+    'PIR_HEARTH': 'ana',
+    'GOOD_MORNING_KITTY': 'ana',
+
+    'RELATIVITY': 'tars',
+    'HOSTILE': 'tars',
+    'DREAMBLOWER': 'tars',
+    'BACKSTAGE': 'tars',
+    'COCORICA': 'tars',
+    'FROM_ABOVE': 'tars',
+
+}
 
 
 class SubmitterNuke(QtWidgets.QMainWindow):
@@ -38,8 +59,6 @@ class SubmitterNuke(QtWidgets.QMainWindow):
         self.input_frame_end.setText('2')
         for project in projects:
             self.list_project.addItem(project)
-        for salle in projects:
-            self.list_salle.addItem(salle)
         for ram in rams:
             self.cb_ram.addItem(ram)
 
@@ -55,18 +74,21 @@ class SubmitterNuke(QtWidgets.QMainWindow):
         job_name = str(self.input_job_name.text())
         increment = int(self.input_frame_increment.text())
         frames_per_task = int(self.input_frame_per_task.text())
-        salles_selected = []
         projects_selected = []
-        ram_selected = self.cb_ram.currentText()
+        proj = cmds.file(query=True, sceneName=True).replace(
+            os.sep, '/').split('/scenes')[0]
 
-        for select in self.list_salle.selectedItems():
-            salles_selected.append("p_" + select.text())
+        isRack = False
         for project in self.list_project.selectedItems():
-            projects_selected.append(project.text())
+            if str(project.text()).lower() == "rack_linux":
+                isRack = True
+            projects_selected.append("p_" + str(project.text()).lower())
+        if isRack:
+            projects_selected = ["rack_linux"]
         if self.rb_frame.isChecked():
-            start = int(nuke.frame())
-            end = int(nuke.frame()) + 1
-            frames = str(nuke.frame())
+            start = int(cmds.currentTime(query=True))
+            end = int(cmds.currentTime(query=True)) + 1
+            frames = str(cmds.currentTime(query=True))
         else:
             start = int(self.input_frame_start.text())
             end = int(self.input_frame_end.text())
@@ -76,63 +98,115 @@ class SubmitterNuke(QtWidgets.QMainWindow):
 
         file_path = nuke.root().knob('name').value()
 
-        services = str(" || ".join(salles_selected))
+        services = "(" + " || ".join(projects_selected) + ")"
         if ram_selected == "ram_lower":
-            services = "(" + services + ") && !ram_32"
+            services = services + " && !ram_32"
         elif ram_selected == "ram_32":
-            services = "(" + services + ") && ram_32"
-        if len(projects_selected) != 0:
-            services = "((" + services + ") || (" + \
-                str(' || '.join(projects_selected)) + "))"
+            services = services + " && ram_32"
+
+        if isRack:
+            services = "rackLinux"
+            author.setEngineClientParam(user="artfx")
+
         print("Render on : " + services)
 
         job = author.Job(title=job_name, priority=100, service=services)
 
-        job.newDirMap(src="I:/SynologyDrive/A_PIPE",
-                      dst="//marvin/PFE_RN_2020/A_PIPE", zone="UNC")
-
-        ##### DIR MAP MARVIN #####
-        job.newDirMap(src="I:/SynologyDrive/ARAL",
-                      dst="//marvin/PFE_RN_2020/ARAL", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/CLAIR_DE_LUNE",
-                      dst="//marvin/PFE_RN_2020/CLAIR_DE_LUNE", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/FORGOT_YOUR_PASSWORD", dst="//marvin/PFE_RN_2020/FORGOT_YOUR_PASSWORD",
-                      zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/LOREE",
-                      dst="//marvin/PFE_RN_2020/LOREE", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/RESURGENCE",
-                      dst="//marvin/PFE_RN_2020/RESURGENCE", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/TIMES_DOWN",
-                      dst="//marvin/PFE_RN_2020/TIMES_DOWN", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/TEST_PIPE",
+                      dst="//ana/PFE_RN_2021/TEST_PIPE", zone="UNC")
 
         ##### DIR MAP TARS #####
-        job.newDirMap(src="I:/SynologyDrive/ASCEND",
-                      dst="//tars/PFE_RN_2020/ASCEND", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/ISSEN_SAMA",
-                      dst="//tars/PFE_RN_2020/ISSEN_SAMA", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/LONE",
-                      dst="//tars/PFE_RN_2020/LONE", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/MOON_KEEPER",
-                      dst="//tars/PFE_RN_2020/MOON_KEEPER", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/RELATIVITY",
+                      dst="//tars/PFE_RN_2021/RELATIVITY", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/HOSTILE",
+                      dst="//tars/PFE_RN_2021/HOSTILE", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/DREAMBLOWER",
+                      dst="//tars/PFE_RN_2021/DREAMBLOWER", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/BACKSTAGE",
+                      dst="//tars/PFE_RN_2021/BACKSTAGE", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/COCORICA",
+                      dst="//tars/PFE_RN_2021/COCORICA", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/FROM_ABOVE",
+                      dst="//tars/PFE_RN_2021/FROM_ABOVE", zone="UNC")
 
         ##### DIR MAP ANA #####
-        job.newDirMap(src="I:/SynologyDrive/BREACH",
-                      dst="//ana/PFE_RN_2020/BREACH", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/HARU",
-                      dst="//ana/PFE_RN_2020/HARU", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/VERLAN",
-                      dst="//ana/PFE_RN_2020/VERLAN", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/HAKAM",
+                      dst="//ana/PFE_RN_2021/HAKAM", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/DIVE",
+                      dst="//ana/PFE_RN_2021/DIVE", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/GREEN",
+                      dst="//ana/PFE_RN_2021/GREEN", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/BARNEY",
+                      dst="//ana/PFE_RN_2021/BARNEY", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/PIR_HEARTH",
+                      dst="//ana/PFE_RN_2021/PIR_HEARTH", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/GOOD_MORNING_KITTY",
+                      dst="//ana/PFE_RN_2021/GOOD_MORNING_KITTY", zone="UNC")
+
+        #########################
+        ##### DIR MAP LINUX #####
+        #########################
+
+        job.newDirMap(src="D:/SynologyDrive/TEST_PIPE",
+                      dst="/ana/TEST_PIPE", zone="NFS")
+
+        ##### DIR MAP TARS #####
+        job.newDirMap(src="D:/SynologyDrive/RELATIVITY",
+                      dst="/tars/RELATIVITY", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/HOSTILE",
+                      dst="/tars/HOSTILE", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/DREAMBLOWER",
+                      dst="/tars/DREAMBLOWER", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/BACKSTAGE",
+                      dst="/tars/BACKSTAGE", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/COCORICA",
+                      dst="/tars/COCORICA", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/FROM_ABOVE",
+                      dst="/tars/FROM_ABOVE", zone="NFS")
+
+        ##### DIR MAP ANA #####
+        job.newDirMap(src="D:/SynologyDrive/HAKAM",
+                      dst="/ana/HAKAM", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/DIVE",
+                      dst="/ana/DIVE", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/GREEN",
+                      dst="/ana/GREEN", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/BARNEY",
+                      dst="/ana/BARNEY", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/PIR_HEARTH",
+                      dst="/ana/PIR_HEARTH", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/GOOD_MORNING_KITTY",
+                      dst="/ana/GOOD_MORNING_KITTY", zone="NFS")
+
+        job.newDirMap(src="//tars/PFE_RN_2020", dst="/tars", zone="NFS")
+        job.newDirMap(src="//ana/PFE_RN_2020", dst="/ana", zone="NFS")
+
+        # TODO VERIFICATION
+        job.newDirMap(src="C:/Nuke12.2v2/Nuke12.2.exe",
+                      dst="/usr/nuke/bin/Render", zone="NFS")
+
 
         try:
-            # job.newDirMap(src="I:/SynologyDrive", dst="//marvin/PFE_RN_2020", zone="NFS")
-            for i in range(start, end, frames_per_task):
+            # job.newDirMap(src="D:/SynologyDrive", dst="//marvin/PFE_RN_2021", zone="NFS")
+            if frames_per_task > (end - start):
+                frames_per_task = (end - start + 1)
+            for i in range(start, end + 1, frames_per_task):
+                if (i + frames_per_task - 1) < end:
+                    task_name = "frame {start}-{end}".format(
+                        start=str(i), end=str(i + frames_per_task - 1))
+                else:
+                    task_name = "frame {start}-{end}".format(
+                        start=str(i), end=str(end))
+
                 file_path.replace(os.sep, '/')
                 file_path_start = file_path.split('/03_WORK_PIPE')[0]
-                task_command = ["C:/Nuke11.3v5/Nuke11.3.exe", "-x", "-remap", "{source},%D({target})".format(source=file_path_start, target=file_path_start),
-                                "-F", str(frames), "%D({file_path})".format(file_path=file_path)]
 
-                task_name = "frame {start}-{end}".format(
-                    start=str(i), end=str(i + frames_per_task - 1))
+                if (i + frames_per_task - 1) < end:
+                    task_command = ["C:/Nuke11.3v5/Nuke11.3.exe", "-x", "-remap", "{source},%D({target})".format(source=file_path_start, target=file_path_start),
+                                "-F", str(frames), "%D({file_path})".format(file_path=file_path)]
+                else:
+                    task_command = ["C:/Nuke11.3v5/Nuke11.3.exe", "-x", "-remap", "{source},%D({target})".format(source=file_path_start, target=file_path_start),
+                                "-F", str(frames), "%D({file_path})".format(file_path=file_path)]
 
                 task = author.Task(
                     title=task_name, argv=task_command, service=services)

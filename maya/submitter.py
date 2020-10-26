@@ -18,28 +18,26 @@ for path in paths:
 import tractor.api.author as author
 
 rams = ["All ram", "ram_32", "ram_lower"]
-projects = ["rack_linux", "aral", "ascend", "breach", "clair_de_lune", "fyp", "haru", "issen_sama",
-            "lone", "loree", "moon_keeper", "depths", "times_down", "verlan", "rack"]
+projects = ["rack_linux", "Relativity", "Hostile", "Dreamblower", "Backstage", "Cocorica", "From_Above", "Hakam",
+            "Dive", "Green", "Barney", "Pirhearth", "Kitty", "Test_Pipe", "rack"]
 
 
 project_server = {
 
-    'A_PIPE': 'marvin',
-    'ARAL': 'marvin',
-    'CLAIR_DE_LUNE': 'marvin',
-    'FORGOT_YOUR_PASSWORD': 'marvin',
-    'LOREE': 'marvin',
-    'RESURGENCE': 'marvin',
-    'TIMES_DOWN': 'marvin',
+    'TEST_PIPE': 'ana',
+    'HAKAM': 'ana',
+    'DIVE': 'ana',
+    'GREEN': 'ana',
+    'BARNEY': 'ana',
+    'PIR_HEARTH': 'ana',
+    'GOOD_MORNING_KITTY': 'ana',
 
-    'ASCEND': 'tars',
-    'ISSEN_SAMA': 'tars',
-    'LONE': 'tars',
-    'MOON_KEEPER': 'tars',
-
-    'BREACH': 'ana',
-    'HARU': 'ana',
-    'VERLAN': 'ana'
+    'RELATIVITY': 'tars',
+    'HOSTILE': 'tars',
+    'DREAMBLOWER': 'tars',
+    'BACKSTAGE': 'tars',
+    'COCORICA': 'tars',
+    'FROM_ABOVE': 'tars',
 
 }
 
@@ -122,84 +120,84 @@ class SubmitterMaya(QtWidgets.QMainWindow):
         ##### DIR MAP WINDOWS #####
         ###########################
 
-        job.newDirMap(src="I:/SynologyDrive/A_PIPE",
-                      dst="//marvin/PFE_RN_2020/A_PIPE", zone="UNC")
-        job.newDirMap(src="i:/synologydrive/A_PIPE",
-                      dst="//marvin/PFE_RN_2020/A_PIPE", zone="UNC")
-
-        ##### DIR MAP MARVIN #####
-        job.newDirMap(src="I:/SynologyDrive/ARAL",
-                      dst="//marvin/PFE_RN_2020/ARAL", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/CLAIR_DE_LUNE",
-                      dst="//marvin/PFE_RN_2020/CLAIR_DE_LUNE", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/FORGOT_YOUR_PASSWORD", dst="//marvin/PFE_RN_2020/FORGOT_YOUR_PASSWORD",
-                      zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/LOREE",
-                      dst="//marvin/PFE_RN_2020/LOREE", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/RESURGENCE",
-                      dst="//marvin/PFE_RN_2020/RESURGENCE", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/TIMES_DOWN",
-                      dst="//marvin/PFE_RN_2020/TIMES_DOWN", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/TEST_PIPE",
+                      dst="//ana/PFE_RN_2021/TEST_PIPE", zone="UNC")
 
         ##### DIR MAP TARS #####
-        job.newDirMap(src="I:/SynologyDrive/ASCEND",
-                      dst="//tars/PFE_RN_2020/ASCEND", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/ISSEN_SAMA",
-                      dst="//tars/PFE_RN_2020/ISSEN_SAMA", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/LONE",
-                      dst="//tars/PFE_RN_2020/LONE", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/MOON_KEEPER",
-                      dst="//tars/PFE_RN_2020/MOON_KEEPER", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/RELATIVITY",
+                      dst="//tars/PFE_RN_2021/RELATIVITY", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/HOSTILE",
+                      dst="//tars/PFE_RN_2021/HOSTILE", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/DREAMBLOWER",
+                      dst="//tars/PFE_RN_2021/DREAMBLOWER", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/BACKSTAGE",
+                      dst="//tars/PFE_RN_2021/BACKSTAGE", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/COCORICA",
+                      dst="//tars/PFE_RN_2021/COCORICA", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/FROM_ABOVE",
+                      dst="//tars/PFE_RN_2021/FROM_ABOVE", zone="UNC")
 
         ##### DIR MAP ANA #####
-        job.newDirMap(src="I:/SynologyDrive/BREACH",
-                      dst="//ana/PFE_RN_2020/BREACH", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/HARU",
-                      dst="//ana/PFE_RN_2020/HARU", zone="UNC")
-        job.newDirMap(src="I:/SynologyDrive/VERLAN",
-                      dst="//ana/PFE_RN_2020/VERLAN", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/HAKAM",
+                      dst="//ana/PFE_RN_2021/HAKAM", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/DIVE",
+                      dst="//ana/PFE_RN_2021/DIVE", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/GREEN",
+                      dst="//ana/PFE_RN_2021/GREEN", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/BARNEY",
+                      dst="//ana/PFE_RN_2021/BARNEY", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/PIR_HEARTH",
+                      dst="//ana/PFE_RN_2021/PIR_HEARTH", zone="UNC")
+        job.newDirMap(src="D:/SynologyDrive/GOOD_MORNING_KITTY",
+                      dst="//ana/PFE_RN_2021/GOOD_MORNING_KITTY", zone="UNC")
 
         #########################
         ##### DIR MAP LINUX #####
         #########################
 
-        ##### DIR MAP MARVIN #####
-        job.newDirMap(src="I:/SynologyDrive/ARAL",
-                      dst="/marvin/ARAL", zone="NFS")
-        job.newDirMap(src="I:/SynologyDrive/CLAIR_DE_LUNE",
-                      dst="/marvin/CLAIR_DE_LUNE", zone="NFS")
-        job.newDirMap(src="I:/SynologyDrive/FORGOT_YOUR_PASSWORD",
-                      dst="/marvin/FORGOT_YOUR_PASSWORD", zone="NFS")
-        job.newDirMap(src="I:/SynologyDrive/LOREE",
-                      dst="/marvin/LOREE", zone="NFS")
-        job.newDirMap(src="I:/SynologyDrive/RESURGENCE",
-                      dst="/marvin/RESURGENCE", zone="NFS")
-        job.newDirMap(src="I:/SynologyDrive/TIMES_DOWN",
-                      dst="/marvin/TIMES_DOWN", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/TEST_PIPE",
+                      dst="/ana/TEST_PIPE", zone="NFS")
 
         ##### DIR MAP TARS #####
-        job.newDirMap(src="I:/SynologyDrive/ASCEND",
-                      dst="/tars/ASCEND", zone="NFS")
-        job.newDirMap(src="I:/SynologyDrive/ISSEN_SAMA",
-                      dst="/tars/ISSEN_SAMA", zone="NFS")
-        job.newDirMap(src="I:/SynologyDrive/LONE",
-                      dst="/tars/LONE", zone="NFS")
-        job.newDirMap(src="I:/SynologyDrive/MOON_KEEPER",
-                      dst="/tars/MOON_KEEPER", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/RELATIVITY",
+                      dst="/tars/RELATIVITY", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/HOSTILE",
+                      dst="/tars/HOSTILE", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/DREAMBLOWER",
+                      dst="/tars/DREAMBLOWER", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/BACKSTAGE",
+                      dst="/tars/BACKSTAGE", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/COCORICA",
+                      dst="/tars/COCORICA", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/FROM_ABOVE",
+                      dst="/tars/FROM_ABOVE", zone="NFS")
 
         ##### DIR MAP ANA #####
-        job.newDirMap(src="I:/SynologyDrive/BREACH",
-                      dst="/ana/BREACH", zone="NFS")
-        job.newDirMap(src="I:/SynologyDrive/HARU", dst="/ana/HARU", zone="NFS")
-        job.newDirMap(src="I:/SynologyDrive/VERLAN",
-                      dst="/ana/VERLAN", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/HAKAM",
+                      dst="/ana/HAKAM", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/DIVE",
+                      dst="/ana/DIVE", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/GREEN",
+                      dst="/ana/GREEN", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/BARNEY",
+                      dst="/ana/BARNEY", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/PIR_HEARTH",
+                      dst="/ana/PIR_HEARTH", zone="NFS")
+        job.newDirMap(src="D:/SynologyDrive/GOOD_MORNING_KITTY",
+                      dst="/ana/GOOD_MORNING_KITTY", zone="NFS")
 
-        job.newDirMap(src="//marvin/PFE_RN_2020", dst="/marvin", zone="NFS")
+        job.newDirMap(src="//tars/PFE_RN_2020", dst="/tars", zone="NFS")
+        job.newDirMap(src="//ana/PFE_RN_2020", dst="/ana", zone="NFS")
+
 
         job.newDirMap(src="C:/Maya2019/bin/Render.exe",
                       dst="/usr/autodesk/maya/bin/Render", zone="NFS")
 
-        proj_name = file_path.split('/')[2]
+
+        if file_path.startswith('//'):
+            proj_name = file_path.split('/')[4]
+        else:
+            proj_name = file_path.split('/')[2]
         serv_name = project_server[proj_name]
         if isRack:
             proj = proj.replace("I:/SynologyDrive/", "/%s/" % serv_name)
