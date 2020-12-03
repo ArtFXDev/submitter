@@ -27,12 +27,20 @@ class Submitter(QMainWindow):
         self.input_frame_increment.setText("1")
         self.input_frame_start.setText("1")
         self.input_frame_end.setText("2")
+        self.current_project = self.get_project()
         for project in config.projects:
             self.list_project.addItem(project["short_name"])
+            if self.current_project == project:
+                items = self.list_project.findItems(project["short_name"], QtCore.Qt.MatchCaseSensitive)
+                if items[0]:
+                    self.list_project.setCurrentItem(items[0])
         for pool in config.pools:
             self.list_project.addItem(pool)
         for ram in config.rams:
             self.cb_ram.addItem(ram)
+
+    def get_path(self):
+        return None
 
     def center(self):
         qRect = self.frameGeometry()
@@ -61,7 +69,8 @@ class Submitter(QMainWindow):
                 return True
         return False
 
-    def get_project(self, path):
+    def get_project(self, path=None):
+        path = path or self.get_path()
         if path.startswith('//'):
             project_name = path.split('/')[4].upper()
         else:
@@ -77,11 +86,6 @@ class Submitter(QMainWindow):
         pools_selected = []
         ram_selected = self.cb_ram.currentText()
         path = path.replace(os.sep, "/")
-        # # # # # PROJECT NAME # # # # #
-        if path.startswith('//'):
-            project_name = path.split('/')[4].upper()
-        else:
-            project_name = path.split('/')[2].upper()
 
         # # # # # WORKSPACE # # # # #
         if '/scenes' not in path:
@@ -144,7 +148,7 @@ class Submitter(QMainWindow):
                         executables = [executables]
                 job.add_task(task_name, task_command, services, executables, isLinux)
 
-            job.projects = [str(project_name)]
+            job.projects = [str(self.current_project["name"])]
             # print(job.asTcl())
             job.spool()
             self.success()

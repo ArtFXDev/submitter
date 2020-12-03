@@ -23,6 +23,9 @@ class SubmitterNuke(Submitter):
         self.custom_layout.addWidget(self._rb_render_default)
         self.custom_layout.addWidget(self._rb_render_redshift)
 
+    def get_path(self):
+        return nuke.root()["name"].value()
+
     def pre_submit(self):
         path = nuke.root()["name"].value()
         start = int(nuke.root().firstFrame())

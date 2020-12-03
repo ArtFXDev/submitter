@@ -21,6 +21,9 @@ class SubmitterHoudini(Submitter):
         self.custom_layout.addWidget(self.output_node)
         self.input_job_name.setText(hou.getenv("FARM") or "")
 
+    def get_path(self):
+        return hou.hipFile.path()
+
     def pre_submit(self):
         path = hou.hipFile.path()
         start = int(hou.playbar.frameRange()[0])
@@ -48,7 +51,9 @@ class SubmitterHoudini(Submitter):
         """
         Replace dirmap env and create new file with correct location
         """
-        proj = self.get_project(path)
+        print(self.current_project)
+        print(self.get_project(path))
+        proj = self.current_project or self.get_project(path)
         isLinux = self.is_linux()
         local_root = os.environ["ROOT_PIPE"] or "D:/SynologyDrive"
         local_project = '{}/{}'.format(local_root, proj["name"])

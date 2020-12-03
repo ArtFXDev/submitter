@@ -22,6 +22,10 @@ class SubmitterMaya(Submitter):
         self._rb_render_redshift = QRadioButton("Redshift")
         self.custom_layout.addWidget(self._rb_render_default)
         self.custom_layout.addWidget(self._rb_render_redshift)
+        self._rb_render_default.setChecked(True)
+
+    def get_path(self):
+        return cmds.file(q=True, sceneName=True)
 
     def pre_submit(self):
         path = cmds.file(q=True, sceneName=True)
