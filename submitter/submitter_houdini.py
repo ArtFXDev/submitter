@@ -17,7 +17,7 @@ class SubmitterHoudini(Submitter):
     def __init__(self, parent=get_houdini_window()):
         super(SubmitterHoudini, self).__init__(parent)
         self.output_node = QLineEdit()
-        self.output_node.setPlaceholderText("Output Node : (ex: /out/mantra1)")
+        self.output_node.setPlaceholderText("Output Node : (ex: /out/mantra_ipr)")
         self.custom_layout.addWidget(self.output_node)
         self.input_job_name.setText(hou.getenv("FARM") or "")
 
