@@ -2,7 +2,7 @@ from Qt.QtWidgets import QRadioButton
 import nuke
 import config
 from .submitter_base import Submitter
-from Qt.QtGui import QApplication
+from Qt.QtWidgets import QApplication
 
 app = QApplication.instance()
 

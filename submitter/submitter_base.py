@@ -112,7 +112,7 @@ class Submitter(QMainWindow):
         print("Render on : " + services)
 
         # # # # # ENGINE CLIENT # # # # #
-        set_engine_client(user=("artfx" if isLinux else "admin"))
+        set_engine_client(user=("artfx" if isLinux else "etudiant"))
 
         # # # # # JOB # # # # #
         job = ArtFxJob(title=job_name, priority=100, service=services)
