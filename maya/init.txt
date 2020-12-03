@@ -1,3 +1,0 @@
-import submitter as sub
-win = sub.SubmitterMaya()
-win.show()
