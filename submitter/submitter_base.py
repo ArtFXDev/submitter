@@ -55,6 +55,19 @@ class Submitter(QMainWindow):
         """
         raise NotImplementedError()
 
+    def is_linux(self):
+        for project in self.list_project.selectedItems():
+            if str(project.text()) == "rackLinux":
+                return True
+        return False
+
+    def get_project(self, path):
+        if path.startswith('//'):
+            project_name = path.split('/')[4].upper()
+        else:
+            project_name = path.split('/')[2].upper()
+        return [_proj for _proj in config.projects if str(project_name) == _proj["name"]][0] or None
+
     def submit(self, path, start, end, engine):
         job_name = str(self.input_job_name.text())
         if not job_name:
@@ -76,7 +89,7 @@ class Submitter(QMainWindow):
         workspace = path.split('/scenes')[0]
 
         # # # # # POOLS # # # # #
-        isLinux = False
+        isLinux = self.is_linux()
         if len(self.list_project.selectedItems()) < 1:
             self.error("You need to select a pool")
         for project in self.list_project.selectedItems():
@@ -87,7 +100,6 @@ class Submitter(QMainWindow):
                 continue
             # Linux Rack
             if str(project.text()) == "rackLinux":
-                isLinux = True
                 pools_selected = ["rackLinux"]
                 break
             # Pool
@@ -116,11 +128,6 @@ class Submitter(QMainWindow):
 
         # # # # # JOB # # # # #
         job = ArtFxJob(title=job_name, priority=100, service=services)
-
-        if path.startswith('//'):
-            project_name = path.split('/')[4].upper()
-        else:
-            project_name = path.split('/')[2].upper()
 
         try:
             if frames_per_task > (end - start):
