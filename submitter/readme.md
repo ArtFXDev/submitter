@@ -14,7 +14,6 @@ submitter_houdini.run()
 
 ### Nuke call
 ``` python
-from submitter import submitter_maya
-win = submitter_maya.SubmitterMaya()
-win.show()
+from submitter import submitter_nuke
+submitter_nuke.run()
 ```

@@ -1,6 +1,9 @@
+import os
+from datetime import datetime
+
 import config
 from .submitter_base import Submitter
-import os
+
 import hou
 from Qt.QtWidgets import QLineEdit
 
@@ -26,7 +29,8 @@ class SubmitterHoudini(Submitter):
         if not hou.node(str(self.output_node.text())):
             self.error("Output node error ! please verify the node path")
         hou.hipFile.save()
-        self.submit(path, start, end, "houdini")
+        new_path = self.set_env_dirmap(path)
+        self.submit(new_path, start, end, "houdini")
 
     def task_command(self, is_linux, frame_start, frame_end, file_path, workspace=""):
         command = [
@@ -39,47 +43,54 @@ class SubmitterHoudini(Submitter):
         ]
         return command
 
-    def get_env_var(self, path):
+    # Todo delete, weird thing
+    def set_env_dirmap(self, path):
         """
-        Get the env variable in the current path
-        :return: A dictionary with key: env name and value: env value
-        :rtype: dict
+        Replace dirmap env and create new file with correct location
         """
-        env_dict = {}
-        workspace_path = path.split('/scenes')[0]
-        pnum = ''
-        snum = ''
-        name = ''
-        if '02_SHOT' in path.split('/'):
-            shot_path = path.split('02_SHOT')[0] + '02_SHOT/3d'
-            asset_path = path.split('02_SHOT')[0] + '01_ASSET_3D'
-            pnum = path.split('/')[8]
-            snum = path.split('/')[7]
-            wipcache_path = os.path.join(path.split('02_SHOT/3d/scenes')[0],
-                                         '03_WIP_CACHE_FX', pnum, snum).replace(os.sep, '/')
-            pubcache_path = os.path.join(path.split('02_SHOT/3d/scenes')[0],
-                                         '04_PUBLISH_CACHE_FX', pnum, snum).replace(os.sep, '/')
-        else:
-            shot_path = path.split('01_ASSET_3D')[0] + '02_SHOT/3d'
-            asset_path = path.split('01_ASSET_3D')[0] + '01_ASSET_3D'
-            name = path.split('/')[6]
-            wipcache_path = os.path.join(path.split('01_ASSET_3D')[
-                                         0], '03_WIP_CACHE_FX', name).replace(os.sep, '/')
-            pubcache_path = os.path.join(path.split('01_ASSET_3D')[
-                                         0], '04_PUBLISH_CACHE_FX', name).replace(os.sep, '/')
+        proj = self.get_project(path)
+        isLinux = self.is_linux()
+        local_root = os.environ["ROOT_PIPE"] or "D:/SynologyDrive"
+        local_project = '{}/{}'.format(local_root, proj["name"])
+        template_server = '/{}/PFE_RN_2021/{}' if isLinux else '//{}/PFE_RN_2021/{}'
+        server_project = template_server.format(proj["server"], proj["name"])
+        # # # # ENV # # # #
+        for var, env_job in [(v, hou.getenv(v)) for v in config.envs]:
+            if not env_job:
+                continue
+            env_job = env_job.replace(local_project, server_project)
+            hou.hscript('setenv {}={}'.format(var, env_job))
 
-        project = path.split('/03_WORK_PIPE')[0]
+        # # # # OPCHANGE # # # #
+        hou.hscript('opchange {local} {server}'.format(local=local_project, server=server_project))
 
-        env_dict['JOB'] = workspace_path
-        env_dict['WIPCACHE'] = wipcache_path
-        env_dict['PUBCACHE'] = pubcache_path
-        env_dict['ASSET'] = asset_path
-        env_dict['SHOT'] = shot_path
-        env_dict['PNUM'] = pnum
-        env_dict['SNUM'] = snum
-        env_dict['ASSET_NAME'] = name
-        env_dict['PROJECT'] = project
-        return env_dict
+        # # # # TEMP FILE # # # #
+        file_name = hou.hipFile.basename()
+        file_split = file_name.split(".")
+        path_split = path.split("/")
+        render_path = '/'.join(path_split[:-2]) + '/render'
+        # Submission on the server directly
+        # render_path = render_path.replace('I:/SynologyDrive/{project}'.format(project=current_project), root_path)
+        now = datetime.now()
+        timestamp = now.strftime("%m-%d-%Y_%H-%M-%S")
+        new_name = "{version}_{file_name}_{timestamp}.{extension}".format(version=path_split[-2], file_name=file_split[0],
+                                                                          timestamp=timestamp, extension=file_split[-1])
+        new_name_path = os.path.join(render_path, new_name).replace(os.sep, '/')
+        if not os.path.exists(render_path):
+            if not os.path.exists(os.path.dirname(render_path)):
+                if not hou.ui.displayConfirmation('The scene path does not exist on the server. \n{}\nAre you sure you want to create it ?'.format(render_path),
+                                                  severity=hou.severityType.Message):
+                    # reloading user file
+                    hou.hipFile.load(hou.hipFile.name(), suppress_save_prompt=True)
+                    return
+                else:
+                    os.makedirs(os.path.dirname(render_path))
+            os.mkdir(render_path)
+
+        hou.hipFile.setName(new_name_path)
+        file_path = new_name_path
+        hou.hipFile.save(file_name=None)
+        return file_path
 
 
 def run():
