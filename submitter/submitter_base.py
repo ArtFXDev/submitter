@@ -191,7 +191,7 @@ class Submitter(QMainWindow):
         msg.setText(message)
         msg.setWindowTitle("RenderFarm")
         msg.setStandardButtons(QMessageBox.Ok)
-        msg.buttonClicked.connect(self.close)
+        msg.buttonClicked.connect(msg.close)
         msg.exec_()
         raise Exception(message)
 

@@ -577,7 +577,7 @@
           <item>
            <widget class="QRadioButton" name="rb_frame">
             <property name="text">
-             <string>Current frame</string>
+             <string>Current frame range</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -645,11 +645,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QListWidget" name="list_project">
-         <property name="selectionMode">
-          <enum>QAbstractItemView::MultiSelection</enum>
-         </property>
-        </widget>
+        <widget class="QListWidget" name="list_project"/>
        </item>
        <item>
         <widget class="QLabel" name="label_7">

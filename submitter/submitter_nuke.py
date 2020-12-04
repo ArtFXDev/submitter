@@ -36,6 +36,7 @@ class SubmitterNuke(Submitter):
     def task_command(self, is_linux, frame_start, frame_end, file_path, workspace=""):
         command = [
             config.batcher["nuke"]["render"]["linux" if is_linux else "win"],
+            "-i",
             "-x",
             # "-remap", "{source},%D({target})".format(source=file_path_start, target=file_path_start),
             "-F", "{start} {end}".format(start=str(frame_start), end=str(frame_end)),

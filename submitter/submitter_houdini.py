@@ -31,9 +31,10 @@ class SubmitterHoudini(Submitter):
         # Test output_node
         if not hou.node(str(self.output_node.text())):
             self.error("Output node error ! please verify the node path")
-        hou.hipFile.save()
-        new_path = self.set_env_dirmap(path)
-        self.submit(new_path, start, end, "houdini")
+        else:
+            hou.hipFile.save()
+            new_path = self.set_env_dirmap(path)
+            self.submit(new_path, start, end, "houdini")
 
     def task_command(self, is_linux, frame_start, frame_end, file_path, workspace=""):
         command = [
@@ -51,8 +52,8 @@ class SubmitterHoudini(Submitter):
         """
         Replace dirmap env and create new file with correct location
         """
-        print(self.current_project)
-        print(self.get_project(path))
+        #print(self.current_project)
+        #print(self.get_project(path))
         proj = self.current_project or self.get_project(path)
         isLinux = self.is_linux()
         local_root = os.environ["ROOT_PIPE"] or "D:/SynologyDrive"
