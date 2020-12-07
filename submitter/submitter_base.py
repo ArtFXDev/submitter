@@ -128,7 +128,7 @@ class Submitter(QMainWindow):
         print("Render on : " + services)
 
         # # # # # ENGINE CLIENT # # # # #
-        set_engine_client(user=("artfx" if isLinux else "etudiant"))
+        set_engine_client(user=("artfx" if isLinux else "admin"))
 
         # # # # # JOB # # # # #
         job = ArtFxJob(title=job_name, priority=100, service=services)
@@ -137,6 +137,8 @@ class Submitter(QMainWindow):
             if frames_per_task > (end - start):
                 frames_per_task = (end - start + 1)
             for i in range(start, end + 1, frames_per_task):
+                # # # # # BEFORE TASK # # # #
+                pre_command = ["cmd", "/c", "//multifct/tools/renderfarm/misc/tractor_admin.bat"]
                 # # # # # TASKS # # # # #
                 task_end_frame = (i + frames_per_task - 1) if (i + frames_per_task - 1) < end else end
                 task_command = self.task_command(isLinux, i, task_end_frame, path, workspace)
@@ -147,10 +149,10 @@ class Submitter(QMainWindow):
                     if type(executables) == str:
                         executables = [executables]
                 job.add_task(task_name, task_command, services, executables, isLinux)
-
+            job.comment = str(self.current_project["name"])
             job.projects = [str(self.current_project["name"])]
             # print(job.asTcl())
-            job.spool()
+            job.spool(owner=str(self.current_project["name"]))
             self.success()
         except Exception as ex:
             self.error(ex.message)
