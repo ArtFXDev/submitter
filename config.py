@@ -26,7 +26,7 @@ rams = ["All ram", "ram_32", "ram_lower"]
 
 pools = ["rackLinux", "cpu", "gpu", "p_td", "p_xavier"]
 
-envs = ['JOB', 'WIPCACHE', 'PUBCACHE', 'ASSET', 'SHOT', 'PROJECT', 'IMAGES_OUT']
+houdini_envs = ['JOB', 'WIPCACHE', 'PUBCACHE', 'ASSET', 'SHOT', 'PROJECT', 'IMAGES_OUT']
 
 batcher = {
     "maya": {
@@ -68,7 +68,6 @@ batcher = {
         }
     },
 }
-
 
 projects = [
     # # # # ANA # # # #

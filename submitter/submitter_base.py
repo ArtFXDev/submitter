@@ -77,7 +77,13 @@ class Submitter(QMainWindow):
             project_name = path.split('/')[2].upper()
         return [_proj for _proj in config.projects if str(project_name) == _proj["name"]][0] or None
 
-    def submit(self, path, start, end, engine):
+    def get_plugins(self):
+        """
+        Get loaded plugins array
+        """
+        raise NotImplementedError()
+
+    def submit(self, path, start, end, engine, plugins=None):
         job_name = str(self.input_job_name.text())
         if not job_name:
             self.info("Job name is needed")
@@ -138,7 +144,8 @@ class Submitter(QMainWindow):
                 frames_per_task = (end - start + 1)
             for i in range(start, end + 1, frames_per_task):
                 # # # # # BEFORE TASK # # # #
-                pre_command = ["cmd", "/c", "//multifct/tools/renderfarm/misc/tractor_admin.bat"]
+                # pre_command = ["cmd", "/c", "//multifct/tools/renderfarm/blade_manager/launch/install_blade_manager.bat"]
+                pre_command = ["cmd", "/c", "//multifct/tools/renderfarm/misc/tractor_add_srv_key.bat"]
                 # # # # # TASKS # # # # #
                 task_end_frame = (i + frames_per_task - 1) if (i + frames_per_task - 1) < end else end
                 task_command = self.task_command(isLinux, i, task_end_frame, path, workspace)
@@ -148,7 +155,7 @@ class Submitter(QMainWindow):
                 if executables:
                     if type(executables) == str:
                         executables = [executables]
-                job.add_task(task_name, task_command, services, executables, isLinux)
+                job.add_task(task_name, task_command, services, engine, plugins, executables, isLinux, pre_command)  #
             job.comment = str(self.current_project["name"])
             job.projects = [str(self.current_project["name"])]
             # print(job.asTcl())

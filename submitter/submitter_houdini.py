@@ -33,8 +33,13 @@ class SubmitterHoudini(Submitter):
             self.error("Output node error ! please verify the node path")
         else:
             hou.hipFile.save()
+            _renderer = hou.nodeType(str(self.output_node.text())).name()
             new_path = self.set_env_dirmap(path)
-            self.submit(new_path, start, end, "houdini")
+            if _renderer in ["redshift", "arnold"]:
+                print("use {} renderer".format(_renderer))
+                self.submit(new_path, start, end, "houdini", [_renderer])
+            else:
+                self.submit(new_path, start, end, "houdini")
 
     def task_command(self, is_linux, frame_start, frame_end, file_path, workspace=""):
         command = [
@@ -61,7 +66,7 @@ class SubmitterHoudini(Submitter):
         template_server = '/{}/PFE_RN_2021/{}' if isLinux else '//{}/PFE_RN_2021/{}'
         server_project = template_server.format(proj["server"], proj["name"])
         # # # # ENV # # # #
-        for var, env_job in [(v, hou.getenv(v)) for v in config.envs]:
+        for var, env_job in [(v, hou.getenv(v)) for v in config.houdini_envs]:
             if not env_job:
                 continue
             env_job = env_job.replace(local_project, server_project)

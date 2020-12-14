@@ -20,9 +20,8 @@ class SubmitterMaya(Submitter):
         super(SubmitterMaya, self).__init__(parent)
         self._rb_render_default = QRadioButton("Default")
         self._rb_render_redshift = QRadioButton("Redshift")
-        self.custom_layout.addWidget(self._rb_render_default)
-        self.custom_layout.addWidget(self._rb_render_redshift)
         self._rb_render_default.setChecked(True)
+        self.renderer = "maya"
 
     def get_path(self):
         return cmds.file(q=True, sceneName=True)
@@ -32,12 +31,17 @@ class SubmitterMaya(Submitter):
         start = int(cmds.currentTime(query=True))
         end = int(cmds.currentTime(query=True)) + 1
         cmds.file(save=True)
-        self.submit(path, start, end, "maya")
+        self.renderer = cmds.getAttr("defaultRenderGlobals.currentRenderer")
+        if self.renderer in ["redshift", "arnold"]:
+            print("use {} renderer".format(self.renderer))
+            self.submit(path, start, end, "maya", [self.renderer])
+        else:
+            self.submit(path, start, end, "maya")
 
     def task_command(self, is_linux, frame_start, frame_end, file_path, workspace=""):
         command = [
             config.batcher["maya"]["render"]["linux" if is_linux else "win"],
-            "-r", "redshift" if self._rb_render_redshift.isChecked() else "file",
+            "-r", "redshift" if self.renderer == "redshift" else "file",
             "-s", "{start}".format(start=str(frame_start)),
             "-e", "{end}".format(end=str(frame_end)),
             "-proj", "%D({proj})".format(proj=workspace),

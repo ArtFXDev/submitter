@@ -15,7 +15,7 @@ class ArtFxJob(author.Job):
         super(ArtFxJob, self).__init__(*args, **kwargs)
         self.dirmap_tractor()
 
-    def add_task(self, name, command, services, executables=None, is_linux=True, pre_command=""):
+    def add_task(self, name, command, services, engine=None, plugins=None, executables=None, is_linux=True, pre_command=""):
         """
         Add a task in the job
         :param str name: Name of the task
@@ -23,12 +23,19 @@ class ArtFxJob(author.Job):
         :param str services: Services of the task
         :param array[str] executables: Executavle te clean up after task
         :param bool is_linux: If is linux
-        :param str or lisy pre_command: Command before the task
+        :param str or list pre_command: Command before the task
         """
         task = author.Task(title=name, service=services)
         if pre_command:
             task.addCommand(author.Command(argv=pre_command))
-        task.addCommand(author.Command(argv=command))
+        cmd = author.Command(argv=command)
+        if engine:
+            _envkey = [engine]
+            if plugins:
+                for plugin in plugins:
+                    _envkey.append("{}-{}".format(engine, plugin))
+            cmd.envkey = _envkey
+        task.addCommand(cmd)
         """
         # # # # # CLEAN UP # # # # #
         for executable in executables:
@@ -39,7 +46,6 @@ class ArtFxJob(author.Job):
                 task.addCleanup(author.Command(argv="pkill -f {}".format(executable), msg="Kill executable"))             
         """
         self.addChild(task)
-
 
     def dirmap_tractor(self):
         """
