@@ -32,7 +32,7 @@ class SubmitterMaya(Submitter):
         end = int(cmds.currentTime(query=True)) + 1
         cmds.file(save=True)
         self.renderer = cmds.getAttr("defaultRenderGlobals.currentRenderer")
-        if self.renderer in ["redshift", "arnold"]:
+        if self.renderer in ["redshift", "arnold", "vray"]:
             print("use {} renderer".format(self.renderer))
             self.submit(path, start, end, "maya", [self.renderer])
         else:

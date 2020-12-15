@@ -35,7 +35,7 @@ class SubmitterHoudini(Submitter):
             hou.hipFile.save()
             _renderer = hou.nodeType(str(self.output_node.text())).name()
             new_path = self.set_env_dirmap(path)
-            if _renderer in ["redshift", "arnold"]:
+            if _renderer in ["redshift", "arnold", "vray"]:
                 print("use {} renderer".format(_renderer))
                 self.submit(new_path, start, end, "houdini", [_renderer])
             else:

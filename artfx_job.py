@@ -15,7 +15,7 @@ class ArtFxJob(author.Job):
         super(ArtFxJob, self).__init__(*args, **kwargs)
         self.dirmap_tractor()
 
-    def add_task(self, name, command, services, engine=None, plugins=None, executables=None, is_linux=True, pre_command=""):
+    def add_task(self, name, command, services, path, server_name, engine=None, plugins=None, executables=None, is_linux=False, pre_command=""):
         """
         Add a task in the job
         :param str name: Name of the task
@@ -29,12 +29,13 @@ class ArtFxJob(author.Job):
         if pre_command:
             task.addCommand(author.Command(argv=pre_command))
         cmd = author.Command(argv=command)
+        _envkey = ["scene {} {} {}".format(path, server_name, str(is_linux))]
         if engine:
-            _envkey = [engine]
+            _envkey.append(engine)
             if plugins:
                 for plugin in plugins:
                     _envkey.append("{}-{}".format(engine, plugin))
-            cmd.envkey = _envkey
+        cmd.envkey = _envkey
         task.addCommand(cmd)
         """
         # # # # # CLEAN UP # # # # #
