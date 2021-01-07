@@ -28,14 +28,18 @@ class Submitter(QMainWindow):
         self.input_frame_start.setText("1")
         self.input_frame_end.setText("2")
         self.current_project = self.get_project()
-        for project in config.projects:
-            self.list_project.addItem(project["short_name"])
-            if self.current_project == project:
-                items = self.list_project.findItems(project["short_name"], QtCore.Qt.MatchCaseSensitive)
-                if items[0]:
-                    self.list_project.setCurrentItem(items[0])
+        # for project in config.projects:
+        #     self.list_project.addItem(project["short_name"])
+        #     if self.current_project == project:
+        #         items = self.list_project.findItems(project["short_name"], QtCore.Qt.MatchCaseSensitive)
+        #         if items[0]:
+        #             self.list_project.setCurrentItem(items[0])
         for pool in config.pools:
             self.list_project.addItem(pool)
+        # Set default to windows10
+        items = self.list_project.findItems("windows10", QtCore.Qt.MatchCaseSensitive)
+        if items[0]:
+            self.list_project.setCurrentItem(items[0])
         for ram in config.rams:
             self.cb_ram.addItem(ram)
 
@@ -71,10 +75,16 @@ class Submitter(QMainWindow):
 
     def get_project(self, path=None):
         path = path or self.get_path()
+        if not path:
+            raise ValueError("You need to be in a pipeline scene")
+        path = path.replace(os.sep, "/")
+        root = os.environ["ROOT_PIPE"] if os.environ["ROOT_PIPE"] else "D:/SynologyDrive"
         if path.startswith('//'):
             project_name = path.split('/')[4].upper()
         else:
-            project_name = path.split('/')[2].upper()
+            path = path.replace(root + "/", "")
+            project_name = path.split('/')[0].upper()
+        print(project_name)
         return [_proj for _proj in config.projects if str(project_name) == _proj["name"]][0] or None
 
     def submit(self, path, start, end, engine, plugins=None):
@@ -97,11 +107,11 @@ class Submitter(QMainWindow):
         if len(self.list_project.selectedItems()) < 1:
             self.error("You need to select a pool")
         for project in self.list_project.selectedItems():
-            # Project
-            _name = [_proj["name"] for _proj in config.projects if str(project.text()) == _proj["short_name"]] or None
-            if _name:
-                pools_selected.append("p_{0!s}".format(_name[0].lower()))
-                continue
+            # # Project
+            # _name = [_proj["name"] for _proj in config.projects if str(project.text()) == _proj["short_name"]] or None
+            # if _name:
+            #     pools_selected.append("p_{0!s}".format(_name[0].lower()))
+            #     continue
             # Linux Rack
             if str(project.text()) == "rackLinux":
                 pools_selected = ["rackLinux"]
@@ -138,8 +148,9 @@ class Submitter(QMainWindow):
                 frames_per_task = (end - start + 1)
             for i in range(start, end + 1, frames_per_task):
                 # # # # # BEFORE TASK # # # #
+                pre_command = None
                 # pre_command = ["cmd", "/c", "//multifct/tools/renderfarm/blade_manager/launch/install_blade_manager.bat"]
-                pre_command = ["cmd", "/c", "//192.168.2.250/tools/renderfarm/misc/tractor_add_srv_key.bat"]
+                # pre_command = ["cmd", "/c", "//192.168.2.250/tools/renderfarm/misc/tractor_add_srv_key.bat"]
                 # # # # # TASKS # # # # #
                 task_end_frame = (i + frames_per_task - 1) if (i + frames_per_task - 1) < end else end
                 task_command = self.task_command(isLinux, i, task_end_frame, path, workspace)
