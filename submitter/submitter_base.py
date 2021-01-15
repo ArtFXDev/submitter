@@ -164,7 +164,7 @@ class Submitter(QMainWindow):
             job.comment = str(self.current_project["name"])
             job.projects = [str(self.current_project["name"])]
             # print(job.asTcl())
-            job.spool(owner=str(self.current_project["name"]))
+            job.spool(owner=("artfx" if isLinux else str(self.current_project["name"])))
             self.success()
         except Exception as ex:
             self.error(ex.message)
