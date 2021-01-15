@@ -41,10 +41,10 @@ class ArtFxJob(author.Job):
         # # # # # CLEAN UP # # # # #
         for executable in executables:
             if not is_linux:
-                cmd = 'tasklist | find /i "Render.exe" && taskkill /im Render.exe /F || echo process Render.exe not running.'
+                cmd = 'taskkill /im {exe} /F || echo process {exe} not running.'.format(exe=executable)
                 task.addCleanup(author.Command(argv=cmd, msg="Kill executable"))
             else:
-                task.addCleanup(author.Command(argv="pkill -f {}".format(executable), msg="Kill executable"))             
+                task.addCleanup(author.Command(argv="pkill -f {}".format(executable), msg="Kill executable"))
         """
         self.addChild(task)
 
