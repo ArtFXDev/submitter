@@ -6,6 +6,7 @@ from Qt import QtCore
 from Qt.QtWidgets import QMainWindow
 from Qt.QtWidgets import QMessageBox
 from Qt.QtWidgets import QDesktopWidget
+from Qt.QtWidgets import QRadioButton
 
 import config
 from artfx_job import ArtFxJob, set_engine_client
@@ -42,6 +43,12 @@ class Submitter(QMainWindow):
             self.list_project.setCurrentItem(items[0])
         for ram in config.rams:
             self.cb_ram.addItem(ram)
+        self.isDev = False
+        if "DEV_PIPELINE" in os.environ and os.environ["DEV_PIPELINE"]:
+            print("Dev mode")
+            self.isDev = True
+            self._rb_only_logs = QRadioButton("OnlyLogs")
+            self.custom_layout.addWidget(self._rb_only_logs)
 
     def get_path(self):
         return None
@@ -135,6 +142,8 @@ class Submitter(QMainWindow):
             services = services + " && !ram_32"
         elif ram_selected == "ram_32":
             services = services + " && ram_32"
+        if self.isDev:
+            services = "td"
         print("Render on : " + services)
 
         # # # # # ENGINE CLIENT # # # # #
@@ -163,8 +172,10 @@ class Submitter(QMainWindow):
                 job.add_task(task_name, task_command, services, path, self.current_project["server"], engine, plugins, executables, isLinux, pre_command)  #
             job.comment = str(self.current_project["name"])
             job.projects = [str(self.current_project["name"])]
-            # print(job.asTcl())
-            job.spool(owner=("artfx" if isLinux else str(self.current_project["name"])))
+            if self.isDev and self._rb_only_logs.isChecked():
+                print(job.asTcl())
+            else:
+                job.spool(owner=("artfx" if isLinux else str(self.current_project["name"])))
             self.success()
         except Exception as ex:
             self.error(ex.message)

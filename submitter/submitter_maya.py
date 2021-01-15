@@ -18,9 +18,9 @@ class SubmitterMaya(Submitter):
 
     def __init__(self, parent=get_maya_window()):
         super(SubmitterMaya, self).__init__(parent)
-        self._rb_render_default = QRadioButton("Default")
-        self._rb_render_redshift = QRadioButton("Redshift")
-        self._rb_render_default.setChecked(True)
+        # self._rb_render_default = QRadioButton("Default")
+        # self._rb_render_redshift = QRadioButton("Redshift")
+        # self._rb_render_default.setChecked(True)
         self.renderer = "maya"
 
     def get_path(self):
