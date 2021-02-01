@@ -515,7 +515,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="input_frame_per_task"/>
+           <widget class="QSpinBox" name="input_frame_per_task">
+            <property name="minimum">
+             <number>5</number>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

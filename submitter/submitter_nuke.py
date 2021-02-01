@@ -44,6 +44,15 @@ class SubmitterNuke(Submitter):
         ]
         return command
 
+    def set_dirmap(self, local_project, server_project, new_name_path, path):
+        nuke.scriptSaveAs(path)
+        # # # # DIRNAME # # # #
+        # cmds.dirmap(en=True)
+        # cmds.dirmap(m=(local_project, server_project))
+        nuke.scriptSaveAs(new_name_path)
+        print("Save file : " + str(new_name_path))
+        nuke.scriptOpen(path)
+
 
 def run():
     for x in get_nuke_window().children():

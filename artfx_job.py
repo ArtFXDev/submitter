@@ -26,9 +26,8 @@ class ArtFxJob(author.Job):
         :param str or list pre_command: Command before the task
         """
         task = author.Task(title=name, service=services)
-        if pre_command:
-            task.addCommand(author.Command(argv=pre_command))
         cmd = author.Command(argv=command)
+        # Build envkeys
         _envkey = ["scene {} {} {}".format(path, server_name, str(is_linux))]
         if engine:
             _envkey.append(engine)
@@ -36,6 +35,11 @@ class ArtFxJob(author.Job):
                 for plugin in plugins:
                     _envkey.append("{}-{}".format(engine, plugin))
         cmd.envkey = _envkey
+        # Pre command
+        if pre_command:
+            pre_cmd = author.Command(argv=pre_command)
+            pre_cmd.envkey = _envkey
+            task.addCommand(pre_cmd)
         task.addCommand(cmd)
         """
         # # # # # CLEAN UP # # # # #
