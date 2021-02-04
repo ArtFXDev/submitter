@@ -26,23 +26,32 @@ class SubmitterNuke(Submitter):
     def get_path(self):
         return nuke.root()["name"].value()
 
-    def pre_submit(self):
-        path = nuke.root()["name"].value()
+    def default_frame_range(self):
         start = int(nuke.root().firstFrame())
         end = int(nuke.root().lastFrame()) + 1
-        nuke.scriptSave()
-        self.submit(path, start, end, "nuke")
+        return (start, end)
 
-    def task_command(self, is_linux, frame_start, frame_end, file_path, workspace=""):
+    def pre_submit(self):
+        path = nuke.root()["name"].value()
+        nuke.scriptSave()
+        self.submit(path, "nuke")
+
+    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
         command = [
             config.batcher["nuke"]["render"]["linux" if is_linux else "win"],
             "-i",
             "-x",
-            # "-remap", "{source},%D({target})".format(source=file_path_start, target=file_path_start),
-            "-F", "{start} {end}".format(start=str(frame_start), end=str(frame_end)),
-            "%D({file_path})".format(file_path=file_path)
+            "%D({file_path})".format(file_path=file_path),
+            "-F", "{start}-{end}x{step}".format(start=str(frame_start), end=str(frame_end), step=str(step)),
         ]
         return command
+
+    def set_dirmap(self, local_project, server_project, new_name_path, path):
+        nuke.scriptSaveAs(path)
+        # # # # DIRNAME # # # #
+        nuke.scriptSaveAs(new_name_path)
+        print("Save file : " + str(new_name_path))
+        nuke.scriptOpen(path)
 
 
 def run():

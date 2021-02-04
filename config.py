@@ -24,7 +24,7 @@ ui_path = path.join(path.dirname(__file__), "submitter", "qt", "submitter.ui")
 
 rams = ["All ram", "ram_32", "ram_lower"]
 
-pools = ["rackLinux", "windows10"]
+pools = ["rackLinux", "work", "windows10", "redshift"]
 
 houdini_envs = ['JOB', 'WIPCACHE', 'PUBCACHE', 'ASSET', 'SHOT', 'PROJECT', 'IMAGES_OUT']
 
