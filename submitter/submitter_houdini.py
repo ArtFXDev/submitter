@@ -7,6 +7,7 @@ from .submitter_base import Submitter
 import hou
 from Qt.QtWidgets import QLineEdit
 
+from .frame_manager import frames_to_framerange
 
 def get_houdini_window():
     return hou.qt.mainWindow()
@@ -27,7 +28,8 @@ class SubmitterHoudini(Submitter):
     def default_frame_range(self):
         start = int(hou.playbar.frameRange()[0])
         end = int(hou.playbar.frameRange()[1])
-        return (start, end)
+        step = 1
+        return (start, end, step)
 
     def pre_submit(self):
         path = hou.hipFile.path()

@@ -29,7 +29,8 @@ class SubmitterNuke(Submitter):
     def default_frame_range(self):
         start = int(nuke.root().firstFrame())
         end = int(nuke.root().lastFrame()) + 1
-        return (start, end)
+        step = 1
+        return (start, end, step)
 
     def pre_submit(self):
         path = nuke.root()["name"].value()

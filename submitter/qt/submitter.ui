@@ -471,60 +471,14 @@
        <property name="spacing">
         <number>0</number>
        </property>
-       <item row="5" column="0">
+       <item row="8" column="0">
         <widget class="QPushButton" name="bt_render">
          <property name="text">
           <string>RENDER</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QWidget" name="widget_frame_per_task" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QLabel" name="label_4">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Frame per Task :</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="input_frame_per_task">
-            <property name="minimum">
-             <number>5</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QWidget" name="widget_2" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QLabel" name="label">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Job name :</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="input_job_name"/>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="1" column="0">
+       <item row="6" column="0">
         <widget class="QWidget" name="widget_frame" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
@@ -552,9 +506,55 @@
          </layout>
         </widget>
        </item>
+       <item row="0" column="0">
+        <widget class="QWidget" name="widget_2" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Job name :</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="input_job_name"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item row="4" column="0">
         <widget class="QWidget" name="custom_widget" native="true">
          <layout class="QHBoxLayout" name="custom_layout"/>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QWidget" name="widget_frame_per_task" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Frame per Task :</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="input_frame_per_task">
+            <property name="minimum">
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
