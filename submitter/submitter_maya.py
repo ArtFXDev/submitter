@@ -27,14 +27,17 @@ class SubmitterMaya(Submitter):
         return cmds.file(q=True, sceneName=True)
 
     def default_frame_range(self):
-        start = int(cmds.currentTime(query=True))
-        end = int(cmds.currentTime(query=True)) + 1
-        return (start, end)
+        start = int(cmds.getAttr("defaultRenderGlobals.startFrame"))
+        end = int(cmds.getAttr("defaultRenderGlobals.endFrame"))
+        step = int(cmds.getAttr("defaultRenderGlobals.byFrame"))
+        return (start, end, step)
 
     def pre_submit(self):
         path = cmds.file(q=True, sceneName=True)
         cmds.file(save=True)
         self.renderer = cmds.getAttr("defaultRenderGlobals.currentRenderer")
+        if not cmds.getAttr("defaultRenderGlobals.imageFilePrefix"):
+            cmds.setAttr("defaultRenderGlobals.imageFilePrefix", os.path.basename(path).split(".")[0])
         if self.renderer in ["redshift", "arnold", "vray"]:
             print("use {} renderer".format(self.renderer))
             self.submit(path, "maya", [self.renderer])

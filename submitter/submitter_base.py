@@ -13,7 +13,7 @@ from artfx_job import ArtFxJob, set_engine_client
 from .frame_manager import framerange_to_frames, frames_to_framerange
 
 import logging
-
+logging.basicConfig()
 log = logging.getLogger('submitter')
 log.setLevel(logging.ERROR)
 
@@ -42,23 +42,30 @@ class Submitter(QMainWindow):
             self.list_project.setCurrentItem(items[0])
         frames = self.default_frame_range()
         # range last value is exclusive so +1 needed
-        str_frames = frames_to_framerange(list(range(frames[0], frames[1] + 1)))
+        str_frames = frames_to_framerange(list(range(frames[0], frames[1] + 1, frames[2])))
         log.info("Frames : " + str(str_frames))
         self.input_frame_pattern.setText(str_frames)
+        mode_str = "PROD"
+        # Beta
+        self.isBeta = True if "beta" in os.getenv("HOUDINI_SCRIPT_PATH") else False
+        if self.isBeta:
+            mode_str = "BETA"
         # Dev mode
         self.isDev = True if os.getenv("DEV_PIPELINE") else False
         if self.isDev:
+            mode_str = "DEV"
             log.setLevel(logging.DEBUG)
             log.info("Dev mode")
             self.isDev = True
             self._rb_only_logs = QRadioButton("OnlyLogs")
             self.custom_layout.addWidget(self._rb_only_logs)
+        self.setWindowTitle("Submitter - " + mode_str)
 
     def get_path(self):
         return None
 
     def default_frame_range(self):
-        return (1, 10)
+        return (1, 10, 1)
 
     def center(self):
         qRect = self.frameGeometry()
