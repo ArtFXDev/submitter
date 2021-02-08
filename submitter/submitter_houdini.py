@@ -7,6 +7,7 @@ from .submitter_base import Submitter
 import hou
 from Qt.QtWidgets import QLineEdit
 
+from .frame_manager import frames_to_framerange
 
 def get_houdini_window():
     return hou.qt.mainWindow()
@@ -24,10 +25,14 @@ class SubmitterHoudini(Submitter):
     def get_path(self):
         return hou.hipFile.path()
 
-    def pre_submit(self):
-        path = hou.hipFile.path()
+    def default_frame_range(self):
         start = int(hou.playbar.frameRange()[0])
         end = int(hou.playbar.frameRange()[1])
+        step = 1
+        return (start, end, step)
+
+    def pre_submit(self):
+        path = hou.hipFile.path()
         # Test output_node
         if not hou.node(str(self.output_node.text())):
             self.error("Output node error ! please verify the node path")
@@ -38,13 +43,13 @@ class SubmitterHoudini(Submitter):
             use_renderer = False
             for renderer_loop in ["redshift", "arnold", "vray"]:
                 if _renderer.startswith(renderer_loop):
-                    self.submit(path, start, end, "houdini", [renderer_loop])
+                    self.submit(path, "houdini", [renderer_loop])
                     use_renderer = True
                     break
             if not use_renderer:
-                self.submit(path, start, end, "houdini")
+                self.submit(path, "houdini")
 
-    def task_command(self, is_linux, frame_start, frame_end, file_path, workspace=""):
+    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
         command = [
             config.batcher["houdini"]["hython"]["linux" if is_linux else "win"],
             config.batcher["houdini"]["hrender"]["linux" if is_linux else "win"],
@@ -57,6 +62,8 @@ class SubmitterHoudini(Submitter):
             command.extend(["-F", str(frame_start)])
         else:
             command.extend(["-f", str(frame_start), str(frame_end)])
+        if step != 1:
+            command.extend(["-i", str(step)])
         return command
 
     # Todo delete, weird thing
