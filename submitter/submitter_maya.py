@@ -4,7 +4,7 @@ from shiboken2 import wrapInstance
 from Qt import QtCore
 from Qt.QtWidgets import QMainWindow
 from Qt.QtWidgets import QRadioButton
-
+import os
 import config
 from .submitter_base import Submitter
 
@@ -36,8 +36,8 @@ class SubmitterMaya(Submitter):
         path = cmds.file(q=True, sceneName=True)
         cmds.file(save=True)
         self.renderer = cmds.getAttr("defaultRenderGlobals.currentRenderer")
-        if not cmds.getAttr("defaultRenderGlobals.imageFilePrefix"):
-            cmds.setAttr("defaultRenderGlobals.imageFilePrefix", os.path.basename(path).split(".")[0])
+        #if not cmds.getAttr("defaultRenderGlobals.imageFilePrefix"):
+            #cmds.setAttr("defaultRenderGlobals.imageFilePrefix", os.path.basename(path).split(".")[0])
         if self.renderer in ["redshift", "arnold", "vray"]:
             print("use {} renderer".format(self.renderer))
             self.submit(path, "maya", [self.renderer])
@@ -48,8 +48,7 @@ class SubmitterMaya(Submitter):
         # project = self.get_project()
         # dirmap_server = "//" + project["server"] if is_linux else "//" + project["server"] + "/PFE_RN_2020/"
         command = [
-            config.batcher["maya"]["render"]["linux" if is_linux else "win"],
-            "-r", "redshift" if self.renderer == "redshift" else "file",
+            "rez-env", "maya", self.renderer, "--", "render",
             "-s", str(frame_start),
             "-e", str(frame_end),
             "-b", str(step),
