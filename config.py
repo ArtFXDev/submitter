@@ -105,7 +105,7 @@ projects = [
         "name": "PIR_HEARTH",
         "server": 'ana',
         "short_name": "pirhearth",
-        "totalFrames": 1000
+        "totalFrames": 7003
     },
     {
         "name": "GOOD_MORNING_KITTY",
@@ -148,6 +148,6 @@ projects = [
         "name": "FROM_ABOVE",
         "server": 'tars',
         "short_name": "from above",
-        "totalFrames": 1000
+        "totalFrames": 9345
     },
 ]

@@ -179,7 +179,6 @@ class Submitter(QMainWindow):
             metadata["scene"][key] = self.sid.get(key)
         metadata["scene"]["project"] = self.current_project["name"]
 
-
         # # # # # ENGINE CLIENT # # # # #
         set_engine_client(user=("artfx" if isLinux else "admin"))
 
@@ -195,8 +194,6 @@ class Submitter(QMainWindow):
                 for i in range(start, end + 1, task_step):
                     # # # # # BEFORE TASK # # # #
                     pre_command = None
-                    if not isLinux:
-                        pre_command = ["cmd", "/c", "//multifct/tools/renderfarm/misc/tractor_add_srv_key.bat"]
                     # # # # # TASKS # # # # #
                     task_end_frame = (i + task_step - 1) if (i + task_step - 1) < end else end
                     log.info("Task: frame {}-{}x{}".format(i, task_end_frame, step))
@@ -295,8 +292,8 @@ class Submitter(QMainWindow):
         render_path = render_path.replace('D:/SynologyDrive/{}'.format(proj["name"]), server_project_win)
         now = datetime.now()
         timestamp = now.strftime("%m-%d-%Y_%H-%M-%S")
-        new_name = "{version}_{file_name}_{timestamp}.{extension}".format(version=path_split[-2], file_name=file_split[0],
-                                                                          timestamp=timestamp, extension=file_split[-1])
+        new_name = "{version}_{file_name}_{timestamp}.{ext}".format(version=path_split[-2], file_name=file_split[0],
+                                                                          timestamp=timestamp, ext=file_split[-1])
         new_name_path = os.path.join(render_path, new_name).replace(os.sep, '/')
         print("check if path exist : " + render_path)
         if not os.path.exists(render_path):

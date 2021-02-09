@@ -66,63 +66,6 @@ class SubmitterHoudini(Submitter):
             command.extend(["-i", str(step)])
         return command
 
-    # Todo delete, weird thing
-    def set_env_dirmap(self, path):
-        """
-        Replace dirmap env and create new file with correct location
-        """
-        # print(self.current_project)
-        # print(self.get_project(path))
-        proj = self.current_project or self.get_project(path)
-        isLinux = self.is_linux()
-        local_root = os.environ["ROOT_PIPE"] or "D:/SynologyDrive"
-        local_project = '{}/{}'.format(local_root, proj["name"])
-        template_server = '/{}/PFE_RN_2021/{}' if isLinux else '//{}/PFE_RN_2021/{}'
-        server_project = template_server.format(proj["server"], proj["name"])
-        # # # # ENV # # # #
-        for var, env_job in [(v, hou.getenv(v)) for v in config.houdini_envs]:
-            if not env_job:
-                continue
-            env_job = env_job.replace(local_project, server_project)
-            hou.hscript('setenv {}={}'.format(var, env_job))
-
-        # # # # OPCHANGE # # # #
-        hou.hscript('opchange {local} {server}'.format(local=local_project, server=server_project))
-
-        # # # # TEMP FILE # # # #
-        file_name = hou.hipFile.basename().replace(os.sep, "/")
-        file_split = file_name.split(".")
-        path_split = path.split("/")
-        render_path = '/'.join(path_split[:-2]) + '/render'
-        # Submission on the server directly
-        # Use windows path becose only windows use submitter
-        server_project_win = '//{}/PFE_RN_2021/{}'.format(proj["server"], proj["name"])
-        render_path = render_path.replace('D:/SynologyDrive/{}'.format(proj["name"]), server_project_win)
-        now = datetime.now()
-        timestamp = now.strftime("%m-%d-%Y_%H-%M-%S")
-        new_name = "{version}_{file_name}_{timestamp}.{extension}".format(version=path_split[-2], file_name=file_split[0],
-                                                                          timestamp=timestamp, extension=file_split[-1])
-        new_name_path = os.path.join(render_path, new_name).replace(os.sep, '/')
-        print("check if path exist : "+render_path )
-        if not os.path.exists(render_path):
-            if not os.path.exists(os.path.dirname(render_path)):
-                if not hou.ui.displayConfirmation('The scene path does not exist on the server. \n{}\nAre you sure you want to create it ?'.format(render_path),
-                                                  severity=hou.severityType.Message):
-                    # reloading user file
-                    hou.hipFile.load(hou.hipFile.name(), suppress_save_prompt=True)
-                    return
-                else:
-                    os.makedirs(os.path.dirname(render_path))
-            os.mkdir(render_path)
-
-        hou.hipFile.setName(new_name_path)
-        hou.hipFile.save(file_name=None)
-        print("Save file : " + str(new_name_path))
-        hou.hipFile.load(path, suppress_save_prompt=True)
-        # Remap to local path for comand dirmap by tractor
-        new_name_path = new_name_path.replace(server_project_win, 'D:/SynologyDrive/{}'.format(proj["name"]))
-        return new_name_path
-
     def set_dirmap(self, local_project, server_project, new_name_path, path):
         hou.hipFile.save(file_name=None)
         # # # # ENV # # # #
