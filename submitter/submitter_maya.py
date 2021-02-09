@@ -62,12 +62,25 @@ class SubmitterMaya(Submitter):
     def set_dirmap(self, local_project, server_project, new_name_path, path):
         cmds.file(save=True)
         # # # # DIRNAME # # # #
-        cmds.dirmap(en=True)
-        cmds.dirmap(m=(local_project, server_project))
-        cmds.file(rename=new_name_path)
-        cmds.file(save=True)
-        print("Save file : " + str(new_name_path))
-        cmds.file(path, open=True, force=True)
+        # Edit file in text mode is .ma else do modification and reopen the scene
+        if path.split(".") == "ma":
+            copyfile(path, new_name_path)
+            file_data = ""
+            with open(new_name_path, "rt") as file:
+                file_data = file.read()
+            file_data = file_data.replace(local_project, server_project)
+            file_data = file_data.replace("%ROOT_PIPE%", server_project)
+            with open(new_name_path, "wt") as file:
+                file.write(file_data)
+        else:
+            for type in cmds.filePathEditor(query=True, listRegisteredTypes=True):
+                for node in cmds.ls(type=type):
+                    cmds.filePathEditor(node, replaceString=(local_project, server_project), replaceField="pathOnly", replaceAll=True)
+                    cmds.filePathEditor(node, replaceString=("%ROOT_PIPE%", server_project), replaceField="pathOnly", replaceAll=True)
+            cmds.file(rename=new_name_path)
+            cmds.file(save=True)
+            print("Save file : " + str(new_name_path))
+            cmds.file(path, open=True, force=True)
 
 
 def run():

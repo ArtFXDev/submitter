@@ -1,5 +1,7 @@
 import os
 from datetime import datetime
+import webbrowser
+import json
 
 from Qt import QtCompat
 from Qt import QtCore
@@ -10,7 +12,8 @@ from Qt.QtWidgets import QRadioButton
 
 import config
 from artfx_job import ArtFxJob, set_engine_client
-from .frame_manager import framerange_to_frames, frames_to_framerange
+from .frame_manager import framerange_to_frames_obj, frames_to_framerange, framerange_to_frames
+from pipeline.libs.manager.entities import Entities
 
 import logging
 logging.basicConfig()
@@ -30,7 +33,14 @@ class Submitter(QMainWindow):
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
         self.center()
         self.bt_render.clicked.connect(self.pre_submit)
+        self.bt_open_tractor.clicked.connect(lambda: webbrowser.open("http://tractor/tv/#"))
+        self.bt_help.clicked.connect(lambda: webbrowser.open("https://github.com/ArtFXDev/submitter/wiki"))
         self.input_frame_per_task.setValue(int(10))
+        self.entity = Entities()
+        self.sid = self.entity.get_engine_sid()
+        if not self.sid:
+            raise ValueError("You need to be in a pipeline scene")
+        log.info("Sid : " + str(self.sid))
         self.current_project = self.get_project()
         for pool in config.pools:
             self.list_project.addItem(pool)
@@ -52,6 +62,11 @@ class Submitter(QMainWindow):
             mode_str = "BETA"
         # Dev mode
         self.isDev = True if os.getenv("DEV_PIPELINE") else False
+        mode_str = ""
+        if "beta" in os.path.dirname(__file__):
+            mode_str = "BETA"
+        if "prod" in os.path.dirname(__file__):
+            mode_str = "PROD"
         if self.isDev:
             mode_str = "DEV"
             log.setLevel(logging.DEBUG)
@@ -61,7 +76,7 @@ class Submitter(QMainWindow):
             self.custom_layout.addWidget(self._rb_only_logs)
         self.setWindowTitle("Submitter - " + mode_str)
 
-    def get_path(self):
+    def get_sid(self):
         return None
 
     def default_frame_range(self):
@@ -137,7 +152,7 @@ class Submitter(QMainWindow):
         # # # # # FRAMES # # # # #
         frames_pattern = self.input_frame_pattern.text().replace(" ", "")
         try:
-            frames_array = framerange_to_frames(frames_pattern)
+            frames_array = framerange_to_frames_obj(frames_pattern)
             print("Render Frames : " + str(frames_array))
         except Exception as ex:
             self.error("Framerange error, please verify your syntax: {}\n{}".format(frames_pattern, ex.message))
@@ -156,6 +171,19 @@ class Submitter(QMainWindow):
             services = "td"
         print("Render on : " + services)
 
+        # # # # # METADATA # # # #
+        metadata = dict()
+        metadata["dcc"] = engine
+        metadata["renderEngine"] = plugins or "default"
+        metadata["frames"] = framerange_to_frames(frames_pattern)
+        metadata["sendUser"] = os.getenv("COMPUTERNAME", None)
+        metadata["renderState"] = "test" if self.rb_test.isChecked() else "final"
+        metadata["totalFrames"] = self.current_project["totalFrames"]
+        metadata["scene"] = dict()
+        for key in self.sid.keys:
+            metadata["scene"][key] = self.sid.get(key)
+        metadata["scene"]["project"] = self.current_project["name"]
+
         # # # # # ENGINE CLIENT # # # # #
         set_engine_client(user=("artfx" if isLinux else "admin"))
 
@@ -171,14 +199,12 @@ class Submitter(QMainWindow):
                 for i in range(start, end + 1, task_step):
                     # # # # # BEFORE TASK # # # #
                     pre_command = None
-                    if not isLinux:
-                        pre_command = ["cmd", "/c", "//multifct/tools/renderfarm/misc/tractor_add_srv_key.bat"]
                     # # # # # TASKS # # # # #
                     task_end_frame = (i + task_step - 1) if (i + task_step - 1) < end else end
                     log.info("Task: frame {}-{}x{}".format(i, task_end_frame, step))
                     task_command = self.task_command(isLinux, i, task_end_frame, step, path, workspace)
                     task_name = "frame {start}-{end}".format(start=str(i), end=str(task_end_frame))
-                    # # # # # CLEAN UP # # # # #
+                    # # # # # TASK CLEAN UP # # # # #
                     executables = config.batcher[engine]["cleanup"]["linux" if isLinux else "win"]
                     if executables:
                         if type(executables) == str:
@@ -186,6 +212,7 @@ class Submitter(QMainWindow):
                     job.add_task(task_name, task_command, services, path, self.current_project["server"], engine, plugins, executables, isLinux, pre_command)
             job.comment = str(self.current_project["name"])
             job.projects = [str(self.current_project["name"])]
+            job.metadata = json.dumps(metadata)
             if self.isDev and self._rb_only_logs.isChecked():
                 print(job.asTcl())
             else:
@@ -270,8 +297,8 @@ class Submitter(QMainWindow):
         render_path = render_path.replace('D:/SynologyDrive/{}'.format(proj["name"]), server_project_win)
         now = datetime.now()
         timestamp = now.strftime("%m-%d-%Y_%H-%M-%S")
-        new_name = "{version}_{file_name}_{timestamp}.{extension}".format(version=path_split[-2], file_name=file_split[0],
-                                                                          timestamp=timestamp, extension=file_split[-1])
+        new_name = "{version}_{file_name}_{timestamp}.{ext}".format(version=path_split[-2], file_name=file_split[0],
+                                                                          timestamp=timestamp, ext=file_split[-1])
         new_name_path = os.path.join(render_path, new_name).replace(os.sep, '/')
         print("check if path exist : " + render_path)
         if not os.path.exists(render_path):

@@ -2,7 +2,7 @@
 Frame range manager
 """
 
-def framerange_to_frames(input_str):
+def framerange_to_frames_obj(input_str):
     """
     Convert a pattern framerange string into a list of frames
     ex : "1-3,5" >> [{start: 1, end: 3, step: 1}, {start: 5, end: 5, step: 1}]
@@ -28,6 +28,33 @@ def framerange_to_frames(input_str):
         framelist.append(frame_object)
 
     return framelist
+
+
+def framerange_to_frames(input_str):
+    """
+    Convert a deadline framerange string into a list of frame numbers
+    ex : "1-3,5" >> [1,2,3,5]
+
+    :param input_str: the deadline framerange string
+    :type input_str: str
+    :rtype: list[int]
+    """
+    framelist = list()
+    splits = input_str.split(',')
+    for split in splits:
+        step = 1
+        if '-' in split:
+            if 'x' in split:
+                step = int(split.split('x')[1])
+                split = split.split('x')[0]
+            start = int(split.split('-')[0])
+            end = int(split.split('-')[1])
+        else:
+            start = end = int(split)
+        for i in range(start, end + 1, step):
+            framelist.append(i)
+
+    return sorted(list(set(framelist)))
 
 
 def frames_to_framerange(frames):
