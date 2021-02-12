@@ -4,7 +4,7 @@ from shiboken2 import wrapInstance
 from Qt import QtCore
 from Qt.QtWidgets import QMainWindow
 from Qt.QtWidgets import QRadioButton
-
+import os
 import config
 from .submitter_base import Submitter
 
