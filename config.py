@@ -24,7 +24,7 @@ ui_path = path.join(path.dirname(__file__), "submitter", "qt", "submitter.ui")
 
 rams = ["All ram", "ram_32", "ram_lower"]
 
-pools = ["rackLinux", "work", "windows10", "redshift", "mk12"]
+pools = ["rackLinux", "work", "windows10", "redshift"]
 
 houdini_envs = ['JOB', 'WIPCACHE', 'PUBCACHE', 'ASSET', 'SHOT', 'PROJECT', 'IMAGES_OUT']
 
@@ -74,67 +74,80 @@ projects = [
     {
         "name": "TEST_PIPE",
         "server": 'ana',
-        "short_name": "test pipe"
+        "short_name": "test pipe",
+        "totalFrames": 1000
     },
     {
         "name": "HAKAM",
         "server": 'ana',
-        "short_name": "hakam"
+        "short_name": "hakam",
+        "totalFrames": 1000
     },
     {
         "name": "DIVE",
         "server": 'ana',
-        "short_name": "dive"
+        "short_name": "dive",
+        "totalFrames": 1000
     },
     {
         "name": "GREEN",
         "server": 'ana',
-        "short_name": "green"
+        "short_name": "green",
+        "totalFrames": 1000
     },
     {
         "name": "BARNEY",
         "server": 'ana',
-        "short_name": "barney"
+        "short_name": "barney",
+        "totalFrames": 1000
     },
     {
         "name": "PIR_HEARTH",
         "server": 'ana',
-        "short_name": "pirhearth"
+        "short_name": "pirhearth",
+        "totalFrames": 7003
     },
     {
         "name": "GOOD_MORNING_KITTY",
         "server": 'ana',
-        "short_name": "kitty"
+        "short_name": "kitty",
+        "totalFrames": 1000
     },
     # # # # TARS # # # #
     {
         "name": "RELATIVITY",
         "server": 'tars',
-        "short_name": "relativity"
+        "short_name": "relativity",
+        "totalFrames": 1000
     },
     {
         "name": "HOSTILE",
         "server": 'tars',
-        "short_name": "hostile"
+        "short_name": "hostile",
+        "totalFrames": 1000
     },
     {
         "name": "DREAMBLOWER",
         "server": 'tars',
-        "short_name": "dreamblower"
+        "short_name": "dreamblower",
+        "totalFrames": 1000
     },
     {
         "name": "BACKSTAGE",
         "server": 'tars',
-        "short_name": "backstage"
+        "short_name": "backstage",
+        "totalFrames": 1000
     },
     {
         "name": "COCORICA",
         "server": 'tars',
-        "short_name": "cocorica"
+        "short_name": "cocorica",
+        "totalFrames": 1000
     },
     {
         "name": "FROM_ABOVE",
         "server": 'tars',
-        "short_name": "from above"
+        "short_name": "from above",
+        "totalFrames": 9345
     },
 ]
