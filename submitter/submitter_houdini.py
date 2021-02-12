@@ -20,7 +20,6 @@ class SubmitterHoudini(Submitter):
         self.output_node = QLineEdit()
         self.output_node.setPlaceholderText("Output Node : (ex: /out/mantra_ipr)")
         self.custom_layout.addWidget(self.output_node)
-        self.input_job_name.setText(hou.getenv("FARM") or "")
 
     def get_path(self):
         return hou.hipFile.path()

@@ -47,6 +47,12 @@ class Submitter(QMainWindow):
         for ram in config.rams:
             self.cb_ram.addItem(ram)
         # Set default values
+        farm = ""
+        if self.sid.is_shot():
+            farm = self.sid.get('project').upper() + '_' + self.sid.get('seq') + '_' + self.sid.get('shot')
+        elif self.sid.is_asset():
+            farm = self.sid.get('project').upper() + '_' + self.sid.get('name')
+        self.input_job_name.setText(farm)
         items = self.list_project.findItems("work", QtCore.Qt.MatchCaseSensitive)
         if items[0]:
             self.list_project.setCurrentItem(items[0])
@@ -109,8 +115,8 @@ class Submitter(QMainWindow):
             project_name = path.split('/')[0].upper()
         return [_proj for _proj in config.projects if str(project_name) == _proj["name"]][0] or None
 
-    def submit(self, path, engine, plugins=None):
-        log.info("Start submit with : path: {} | engine: {} | plugins: {}".format(path, engine, str(plugins)))
+    def submit(self, path, engine_name, plugins=None):
+        log.info("Start submit with : path: {} | engine: {} | plugins: {}".format(path, engine_name, str(plugins)))
         job_name = str(self.input_job_name.text())
         if not job_name:
             self.info("Job name is needed")
@@ -168,7 +174,7 @@ class Submitter(QMainWindow):
 
         # # # # # METADATA # # # #
         metadata = dict()
-        metadata["dcc"] = engine
+        metadata["dcc"] = engine_name
         metadata["renderEngine"] = plugins or "default"
         metadata["frames"] = framerange_to_frames(frames_pattern)
         metadata["sendUser"] = os.getenv("COMPUTERNAME", None)
@@ -200,11 +206,11 @@ class Submitter(QMainWindow):
                     task_command = self.task_command(isLinux, i, task_end_frame, step, path, workspace)
                     task_name = "frame {start}-{end}".format(start=str(i), end=str(task_end_frame))
                     # # # # # TASK CLEAN UP # # # # #
-                    executables = config.batcher[engine]["cleanup"]["linux" if isLinux else "win"]
+                    executables = config.batcher[engine_name]["cleanup"]["linux" if isLinux else "win"]
                     if executables:
                         if type(executables) == str:
                             executables = [executables]
-                    job.add_task(task_name, task_command, services, path, self.current_project["server"], engine, plugins, executables, isLinux, pre_command)
+                    job.add_task(task_name, task_command, services, path, self.current_project["server"], engine_name, plugins, executables, isLinux, pre_command)
             job.comment = str(self.current_project["name"])
             job.projects = [str(self.current_project["name"])]
             job.metadata = json.dumps(metadata)
