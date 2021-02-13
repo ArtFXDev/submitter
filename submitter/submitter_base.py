@@ -13,7 +13,7 @@ from Qt.QtWidgets import QRadioButton
 import config
 from artfx_job import ArtFxJob, set_engine_client
 from .frame_manager import framerange_to_frames_obj, frames_to_framerange, framerange_to_frames
-from pipeline.libs.manager.entities import Entities
+from pipeline.libs.engine import engine
 
 import logging
 logging.basicConfig()
@@ -36,8 +36,8 @@ class Submitter(QMainWindow):
         self.bt_open_tractor.clicked.connect(lambda: webbrowser.open("http://tractor/tv/#"))
         self.bt_help.clicked.connect(lambda: webbrowser.open("https://github.com/ArtFXDev/submitter/wiki"))
         self.input_frame_per_task.setValue(int(10))
-        self.entity = Entities()
-        self.sid = self.entity.get_engine_sid()
+        self._engine = engine.get()
+        self.sid = self._engine.get_sid()
         if not self.sid:
             raise ValueError("You need to be in a pipeline scene")
         log.info("Sid : " + str(self.sid))

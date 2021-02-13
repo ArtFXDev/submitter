@@ -472,31 +472,6 @@
         <number>0</number>
        </property>
        <item row="20" column="0">
-        <widget class="QPushButton" name="bt_render">
-         <property name="text">
-          <string>RENDER</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QWidget" name="custom_widget" native="true">
-         <layout class="QHBoxLayout" name="custom_layout">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-         </layout>
-        </widget>
-       </item>
-       <item row="19" column="0">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -508,55 +483,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-       <item row="17" column="0">
-        <widget class="QWidget" name="widget_frame" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <item>
-           <widget class="QLabel" name="label_2">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Frame :</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="input_frame_pattern">
-            <property name="toolTip">
-             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;frameStart &lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;-&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;/&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;frameEnd &lt;/span&gt;(&lt;span style=&quot; font-weight:600;&quot;&gt;x&lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;1-10&lt;/span&gt; indicates frames 1, 2, 3, 4, 5, 6, 7, 8, 9, and 10.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;1-10x2&lt;/span&gt; indicates frames 1, 3, 5, 7, and 9.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;45 &lt;/span&gt;indicates frame 45&lt;/p&gt;&lt;p&gt;Use , (comma) to use multiple rules&lt;/p&gt;&lt;p&gt;Ex: I want to render frames 50 to 80 and a missing frame 87&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;50 - 80 , 87&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;*space will be remove (optional)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="placeholderText">
-             <string notr="true">ex: 1-3,5 for frame 1,2,3 and 5</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="14" column="0">
-        <widget class="QWidget" name="widget_2" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QLabel" name="label">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Job name :</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="input_job_name"/>
-          </item>
-         </layout>
-        </widget>
        </item>
        <item row="16" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -598,6 +524,34 @@
          </item>
         </layout>
        </item>
+       <item row="21" column="0">
+        <widget class="QPushButton" name="bt_render">
+         <property name="text">
+          <string>RENDER</string>
+         </property>
+        </widget>
+       </item>
+       <item row="14" column="0">
+        <widget class="QWidget" name="widget_2" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Job name :</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="input_job_name"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item row="18" column="0">
         <widget class="QWidget" name="widget_frame_per_task" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -620,6 +574,58 @@
             </property>
            </widget>
           </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="17" column="0">
+        <widget class="QWidget" name="widget_frame" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Frame :</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="input_frame_pattern">
+            <property name="toolTip">
+             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;frameStart &lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;-&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;/&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;frameEnd &lt;/span&gt;(&lt;span style=&quot; font-weight:600;&quot;&gt;x&lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;1-10&lt;/span&gt; indicates frames 1, 2, 3, 4, 5, 6, 7, 8, 9, and 10.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;1-10x2&lt;/span&gt; indicates frames 1, 3, 5, 7, and 9.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;45 &lt;/span&gt;indicates frame 45&lt;/p&gt;&lt;p&gt;Use , (comma) to use multiple rules&lt;/p&gt;&lt;p&gt;Ex: I want to render frames 50 to 80 and a missing frame 87&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;50 - 80 , 87&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;*space will be remove (optional)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="placeholderText">
+             <string notr="true">ex: 1-3,5 for frame 1,2,3 and 5</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="19" column="0">
+        <widget class="QWidget" name="custom_widget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <layout class="QHBoxLayout" name="custom_layout">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
          </layout>
         </widget>
        </item>
