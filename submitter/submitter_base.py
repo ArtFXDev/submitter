@@ -13,7 +13,7 @@ from Qt.QtWidgets import QRadioButton
 import config
 from artfx_job import ArtFxJob, set_engine_client
 from .frame_manager import framerange_to_frames_obj, frames_to_framerange, framerange_to_frames
-from pipeline.libs.manager.entities import Entities
+from pipeline.libs.engine import engine
 
 import logging
 logging.basicConfig()
@@ -36,8 +36,8 @@ class Submitter(QMainWindow):
         self.bt_open_tractor.clicked.connect(lambda: webbrowser.open("http://tractor/tv/#"))
         self.bt_help.clicked.connect(lambda: webbrowser.open("https://github.com/ArtFXDev/submitter/wiki"))
         self.input_frame_per_task.setValue(int(10))
-        self.entity = Entities()
-        self.sid = self.entity.get_engine_sid()
+        self._engine = engine.get()
+        self.sid = self._engine.get_sid()
         if not self.sid:
             raise ValueError("You need to be in a pipeline scene")
         log.info("Sid : " + str(self.sid))
@@ -47,6 +47,12 @@ class Submitter(QMainWindow):
         for ram in config.rams:
             self.cb_ram.addItem(ram)
         # Set default values
+        farm = ""
+        if self.sid.is_shot():
+            farm = self.sid.get('project').upper() + '_' + self.sid.get('seq') + '_' + self.sid.get('shot')
+        elif self.sid.is_asset():
+            farm = self.sid.get('project').upper() + '_' + self.sid.get('name')
+        self.input_job_name.setText(farm)
         items = self.list_project.findItems("work", QtCore.Qt.MatchCaseSensitive)
         if items[0]:
             self.list_project.setCurrentItem(items[0])
@@ -109,8 +115,8 @@ class Submitter(QMainWindow):
             project_name = path.split('/')[0].upper()
         return [_proj for _proj in config.projects if str(project_name) == _proj["name"]][0] or None
 
-    def submit(self, path, engine, plugins=None):
-        log.info("Start submit with : path: {} | engine: {} | plugins: {}".format(path, engine, str(plugins)))
+    def submit(self, path, engine_name, plugins=None):
+        log.info("Start submit with : path: {} | engine: {} | plugins: {}".format(path, engine_name, str(plugins)))
         job_name = str(self.input_job_name.text())
         if not job_name:
             self.info("Job name is needed")
@@ -168,7 +174,7 @@ class Submitter(QMainWindow):
 
         # # # # # METADATA # # # #
         metadata = dict()
-        metadata["dcc"] = engine
+        metadata["dcc"] = engine_name
         metadata["renderEngine"] = plugins or "default"
         metadata["frames"] = framerange_to_frames(frames_pattern)
         metadata["sendUser"] = os.getenv("COMPUTERNAME", None)
@@ -178,7 +184,6 @@ class Submitter(QMainWindow):
         for key in self.sid.keys:
             metadata["scene"][key] = self.sid.get(key)
         metadata["scene"]["project"] = self.current_project["name"]
-
 
         # # # # # ENGINE CLIENT # # # # #
         set_engine_client(user=("artfx" if isLinux else "admin"))
@@ -195,19 +200,17 @@ class Submitter(QMainWindow):
                 for i in range(start, end + 1, task_step):
                     # # # # # BEFORE TASK # # # #
                     pre_command = None
-                    if not isLinux:
-                        pre_command = ["cmd", "/c", "//multifct/tools/renderfarm/misc/tractor_add_srv_key.bat"]
                     # # # # # TASKS # # # # #
                     task_end_frame = (i + task_step - 1) if (i + task_step - 1) < end else end
                     log.info("Task: frame {}-{}x{}".format(i, task_end_frame, step))
                     task_command = self.task_command(isLinux, i, task_end_frame, step, path, workspace)
                     task_name = "frame {start}-{end}".format(start=str(i), end=str(task_end_frame))
                     # # # # # TASK CLEAN UP # # # # #
-                    executables = config.batcher[engine]["cleanup"]["linux" if isLinux else "win"]
+                    executables = config.batcher[engine_name]["cleanup"]["linux" if isLinux else "win"]
                     if executables:
                         if type(executables) == str:
                             executables = [executables]
-                    job.add_task(task_name, task_command, services, path, self.current_project["server"], engine, plugins, executables, isLinux, pre_command)
+                    job.add_task(task_name, task_command, services, path, self.current_project["server"], engine_name, plugins, executables, isLinux, pre_command)
             job.comment = str(self.current_project["name"])
             job.projects = [str(self.current_project["name"])]
             job.metadata = json.dumps(metadata)
@@ -295,8 +298,8 @@ class Submitter(QMainWindow):
         render_path = render_path.replace('D:/SynologyDrive/{}'.format(proj["name"]), server_project_win)
         now = datetime.now()
         timestamp = now.strftime("%m-%d-%Y_%H-%M-%S")
-        new_name = "{version}_{file_name}_{timestamp}.{extension}".format(version=path_split[-2], file_name=file_split[0],
-                                                                          timestamp=timestamp, extension=file_split[-1])
+        new_name = "{version}_{file_name}_{timestamp}.{ext}".format(version=path_split[-2], file_name=file_split[0],
+                                                                          timestamp=timestamp, ext=file_split[-1])
         new_name_path = os.path.join(render_path, new_name).replace(os.sep, '/')
         print("check if path exist : " + render_path)
         if not os.path.exists(render_path):
