@@ -36,17 +36,32 @@ class SubmitterHoudini(Submitter):
         if not hou.node(str(self.output_node.text())):
             self.error("Output node error ! please verify the node path")
         else:
-            hou.hipFile.save()
-            _renderer = hou.nodeType(str(self.output_node.text())).name().lower()
-            # new_path = self.set_env_dirmap(path)
-            use_renderer = False
-            for renderer_loop in ["redshift", "arnold", "vray"]:
-                if _renderer.startswith(renderer_loop):
-                    self.submit(path, "houdini", [renderer_loop])
-                    use_renderer = True
-                    break
-            if not use_renderer:
-                self.submit(path, "houdini")
+            #check node type
+            #if merge:
+            #   get number of connected node
+            #   add it to an array
+            #for i in array :
+            #   submit
+            list_rop = []
+            if(self.output_node.type().name() == "merge"):
+                list_rop = self.output_node.inputs()
+                print("merge detected. Nodes = "+str(list_rop))
+            else :
+                list_rop = [self.output_node]
+
+            for node in list_rop:
+                self.output_node = node
+                hou.hipFile.save()
+                _renderer = hou.nodeType(str(self.output_node.text())).name().lower()
+                # new_path = self.set_env_dirmap(path)
+                use_renderer = False
+                for renderer_loop in ["redshift", "arnold", "vray"]:
+                    if _renderer.startswith(renderer_loop):
+                        self.submit(path, "houdini", [renderer_loop])
+                        use_renderer = True
+                        break
+                if not use_renderer:
+                    self.submit(path, "houdini")
 
     def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
         command = [
