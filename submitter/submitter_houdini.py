@@ -20,7 +20,9 @@ class SubmitterHoudini(Submitter):
         self.output_node = QLineEdit()
         self.output_node.setPlaceholderText("Output Node : (ex: /out/mantra_ipr)")
         self.custom_layout.addWidget(self.output_node)
-
+        self.rop_node = None
+        self.list_rop = []
+        
     def get_path(self):
         return hou.hipFile.path()
 
@@ -42,17 +44,25 @@ class SubmitterHoudini(Submitter):
             #   add it to an array
             #for i in array :
             #   submit
-            list_rop = []
-            if(self.output_node.type().name() == "merge"):
-                list_rop = self.output_node.inputs()
-                print("merge detected. Nodes = "+str(list_rop))
+            print("#######pre submit#########")
+            print("node = "+self.output_node.text())
+            self.rop_node = hou.node(self.output_node.text())
+            #print("self.output_node.type().name() = "+self.output_node.type().name())
+            if(self.rop_node.type().name() == "merge"):
+                list_rop = self.rop_node.inputs()
+                for rop in list_rop:
+                    self.list_rop.append(rop.path())
+                print("merge detected. Nodes = "+str(self.list_rop))
             else :
-                list_rop = [self.output_node]
+                self.list_rop = [self.rop_node.path()]
 
-            for node in list_rop:
-                self.output_node = node
+            for node in self.list_rop:
+                print("start render for node "+node)
+                #self.output_node.setText(node.path())
+                self.rop_node=node
                 hou.hipFile.save()
-                _renderer = hou.nodeType(str(self.output_node.text())).name().lower()
+                print("self.rop_node.type() = "+str(hou.node(self.rop_node).type().name()))
+                _renderer = hou.node(self.rop_node).type().name().lower()
                 # new_path = self.set_env_dirmap(path)
                 use_renderer = False
                 for renderer_loop in ["redshift", "arnold", "vray"]:
@@ -62,15 +72,16 @@ class SubmitterHoudini(Submitter):
                         break
                 if not use_renderer:
                     self.submit(path, "houdini")
+                print( "######### "+node + " submitted ############")
 
     def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
         command = [
             config.batcher["houdini"]["hython"]["linux" if is_linux else "win"],
             config.batcher["houdini"]["hrender"]["linux" if is_linux else "win"],
-            "%D({file_path})".format(file_path=file_path),
+            "%D({file_path})".format(file_path=self.new_name),
             "-v",
             "-e",
-            "-d", str(self.output_node.text()),
+            "-d", self.rop_node,
         ]
         if frame_start == frame_end:
             command.extend(["-F", str(frame_start)])
@@ -81,6 +92,11 @@ class SubmitterHoudini(Submitter):
         return command
 
     def set_dirmap(self, local_project, server_project, new_name_path, path):
+        hou_node = hou.node(self.rop_node)
+        print("set_dirmap : new_name_path = "+new_name_path+" | rop node = "+hou_node.name())
+        new_name_path = new_name_path.replace(".hipnc","_"+hou_node.name()+".hipnc") #add the rop name to handle rendering with merge node
+        print("set_dirmap : new_name_path = "+new_name_path)
+        
         hou.hipFile.save(file_name=None)
         # # # # ENV # # # #
         for var, env_job in [(v, hou.getenv(v)) for v in config.houdini_envs]:
@@ -94,6 +110,7 @@ class SubmitterHoudini(Submitter):
         hou.hipFile.setName(new_name_path)
         hou.hipFile.save(file_name=None)
         print("Save file : " + str(new_name_path))
+        self.new_name = new_name_path
         hou.hipFile.load(path, suppress_save_prompt=True)
 
 
