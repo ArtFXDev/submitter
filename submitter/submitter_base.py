@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 import webbrowser
 import json
+from shutil import copyfile
 
 from Qt import QtCompat
 from Qt import QtCore
@@ -15,6 +16,8 @@ from artfx_job import ArtFxJob, set_engine_client
 from .frame_manager import framerange_to_frames_obj, frames_to_framerange, framerange_to_frames
 from pipeline.libs.engine import engine
 
+from pipeline.libs.spil.libs.sid import Sid
+
 import logging
 logging.basicConfig()
 log = logging.getLogger('submitter')
@@ -26,22 +29,25 @@ class Submitter(QMainWindow):
     Default submitter, implement the default working of the submitter.
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, sid=None):
+        print("sid Submitter __init__ : " + str(sid))
         super(Submitter, self).__init__(parent)
         # setup ui
         QtCompat.loadUi(config.ui_path, self)
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
         self.center()
-        self.bt_render.clicked.connect(self.pre_submit)
         self.bt_open_tractor.clicked.connect(lambda: webbrowser.open("http://tractor/tv/#"))
         self.bt_help.clicked.connect(lambda: webbrowser.open("https://github.com/ArtFXDev/submitter/wiki"))
-        self.input_frame_per_task.setValue(int(10))
+        self.bt_render.clicked.connect(self.pre_submit)
         self._engine = engine.get()
-        self.sid = self._engine.get_sid()
+        if sid:
+            self.sid = sid
+        else:
+            self.sid = Sid(path=self._engine.get_file_path())
         if not self.sid:
             raise ValueError("You need to be in a pipeline scene")
         log.info("Sid : " + str(self.sid))
-        self.current_project = self.get_project()
+        self.current_project = self.get_project(self.sid.path)
         for pool in config.pools:
             self.list_project.addItem(pool)
         for ram in config.rams:
@@ -102,8 +108,8 @@ class Submitter(QMainWindow):
                 return True
         return False
 
-    def get_project(self, path=None):
-        path = path or self.get_path()
+    def get_project(self, path):
+        path = path
         if not path:
             raise ValueError("You need to be in a pipeline scene")
         path = path.replace(os.sep, "/")
@@ -280,7 +286,7 @@ class Submitter(QMainWindow):
         """
         Create a tempory render scene file to avoid scene modification
         """
-        proj = self.current_project or self.get_project(path)
+        proj = self.current_project
         isLinux = self.is_linux()
         local_root = os.environ["ROOT_PIPE"] or "D:/SynologyDrive"
         local_project = '{}/{}'.format(local_root, proj["name"])
@@ -302,19 +308,20 @@ class Submitter(QMainWindow):
                                                                           timestamp=timestamp, ext=file_split[-1])
         new_name_path = os.path.join(render_path, new_name).replace(os.sep, '/')
         print("check if path exist : " + render_path)
-        if not os.path.exists(render_path):
-            if not os.path.exists(os.path.dirname(render_path)):
-                os.makedirs(os.path.dirname(render_path))
-            os.mkdir(render_path)
+        try:
+            if not os.path.exists(render_path):
+                if not os.path.exists(os.path.dirname(render_path)):
+                    os.makedirs(os.path.dirname(render_path))
+                os.mkdir(render_path)
+            copyfile(path, new_name_path)  # Copy scene file into server
+        except WindowsError as ex:
+            self.error("Can't access to server !\n" + ex.message)
+        except Exception as ex:
+            self.error("Can't create file !\n" + ex.message)
 
-        # # # # DIRMAP # # # #
-        self.set_dirmap(local_project, server_project, new_name_path, path)
-        # Remap to local path for comand dirmap by tractor
+        # Remap to local path for command dirmap by tractor
         new_name_path = new_name_path.replace(server_project_win, 'D:/SynologyDrive/{}'.format(proj["name"]))
         return new_name_path
-
-    def set_dirmap(self, local_project, server_project, new_name_path, path):
-        pass
 
 
 def run():
