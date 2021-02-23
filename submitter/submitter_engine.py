@@ -18,7 +18,6 @@ import subprocess
 class SubmitterEngine(Submitter):
 
     def __init__(self, parent=None, sid=None):
-        print("sid SubmitterEngine __init__ : " + str(sid))
         super(SubmitterEngine, self).__init__(parent, sid)
         self.sid = sid
         if not self.sid or not self.sid.has_a("ext"):
@@ -158,7 +157,6 @@ class SubmitterEngine(Submitter):
 
 
 def run(sid):
-    print("sid in run : " + str(sid))
     win = SubmitterEngine(sid=sid)
     win.show()
 

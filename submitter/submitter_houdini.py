@@ -43,7 +43,7 @@ class SubmitterHoudini(Submitter):
         path = hou.hipFile.path()
         hou.hipFile.save(file_name=None)
         # Test output_node
-        if not hou.node(str(self.output_node.text())):
+        if not hou.node(str(self.output_node.currentText())):
             self.error("Output node error ! please verify the node path")
         else:
             # check node type
@@ -52,7 +52,7 @@ class SubmitterHoudini(Submitter):
             #    add it to an array
             # for i in array :
             #   submit
-            self.rop_node = hou.node(self.output_node.text())
+            self.rop_node = hou.node(self.output_node.currentText())
             if self.rop_node.type().name() == "merge":
                 list_rop = self.rop_node.inputs()
                 for rop in list_rop:
@@ -78,7 +78,7 @@ class SubmitterHoudini(Submitter):
         command = [
             config.batcher["houdini"]["hython"]["linux" if is_linux else "win"],
             config.batcher["houdini"]["hrender"]["linux" if is_linux else "win"],
-            "%D({file_path})".format(file_path=self.new_name),
+            "%D({file_path})".format(file_path=file_path),
             "-v",
             "-e",
             "-d", self.rop_node,
