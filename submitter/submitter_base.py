@@ -136,7 +136,7 @@ class Submitter(QMainWindow):
             self.error("You need to use minimum 5 frame per task")
             return 0
 
-        # # # # # DIRMAP # # # #
+        # # # # # TMP SCENE # # # #
         path = self.create_render_file(path)
 
         # # # # # WORKSPACE # # # # #
@@ -182,14 +182,13 @@ class Submitter(QMainWindow):
         metadata = dict()
         metadata["dcc"] = engine_name
         metadata["renderEngine"] = plugins or "default"
-        metadata["frames"] = framerange_to_frames(frames_pattern)
+        # metadata["frames"] = framerange_to_frames(frames_pattern)
         metadata["sendUser"] = os.getenv("COMPUTERNAME", None)
         metadata["renderState"] = "test" if self.rb_test.isChecked() else "final"
         metadata["totalFrames"] = self.current_project["totalFrames"]
-        metadata["scene"] = dict()
         for key in self.sid.keys:
-            metadata["scene"][key] = self.sid.get(key)
-        metadata["scene"]["project"] = self.current_project["name"]
+            metadata[key] = self.sid.get(key)
+        metadata["project"] = self.current_project["name"]
 
         # # # # # ENGINE CLIENT # # # # #
         set_engine_client(user=("artfx" if isLinux else "admin"))
@@ -210,13 +209,14 @@ class Submitter(QMainWindow):
                     task_end_frame = (i + task_step - 1) if (i + task_step - 1) < end else end
                     log.info("Task: frame {}-{}x{}".format(i, task_end_frame, step))
                     task_command = self.task_command(isLinux, i, task_end_frame, step, path, workspace)
-                    task_name = "frame {start}-{end}".format(start=str(i), end=str(task_end_frame))
+                    task_name = "frame {start}-{end}x{step}".format(start=str(i), end=str(task_end_frame), step=str(step))
                     # # # # # TASK CLEAN UP # # # # #
-                    executables = config.batcher[engine_name]["cleanup"]["linux" if isLinux else "win"]
-                    if executables:
-                        if type(executables) == str:
-                            executables = [executables]
-                    job.add_task(task_name, task_command, services, path, self.current_project["server"], engine_name, plugins, executables, isLinux, pre_command)
+                    # executables = config.batcher[engine_name]["cleanup"]["linux" if isLinux else "win"]
+                    # if executables:
+                    #     if type(executables) == str:
+                    #         executables = [executables]
+                    job.add_task(task_name, task_command, services, path, self.current_project["server"], frames_pattern,
+                                 engine_name, plugins, [], isLinux, pre_command)
             job.comment = str(self.current_project["name"])
             job.projects = [str(self.current_project["name"])]
             job.metadata = json.dumps(metadata)
