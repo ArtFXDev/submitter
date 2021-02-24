@@ -5,9 +5,11 @@ import config
 from .submitter_base import Submitter
 
 import hou
-from Qt.QtWidgets import QLineEdit
+from Qt.QtWidgets import QComboBox
 
 from .frame_manager import frames_to_framerange
+
+from shutil import copyfile
 
 def get_houdini_window():
     return hou.qt.mainWindow()
@@ -17,9 +19,16 @@ class SubmitterHoudini(Submitter):
 
     def __init__(self, parent=get_houdini_window()):
         super(SubmitterHoudini, self).__init__(parent)
-        self.output_node = QLineEdit()
-        self.output_node.setPlaceholderText("Output Node : (ex: /out/mantra_ipr)")
+        self.output_node = QComboBox()
+        self.output_node.setEditable(True)
+        self.output_node.addItems(self.get_out_nodes())
         self.custom_layout.addWidget(self.output_node)
+        self.rop_node = None
+        self.list_rop = []
+
+    def get_out_nodes(self):
+        out_nodes = [out_node.path() for out_node in hou.node("out/").children()]
+        return out_nodes
 
     def get_path(self):
         return hou.hipFile.path()
@@ -32,21 +41,38 @@ class SubmitterHoudini(Submitter):
 
     def pre_submit(self):
         path = hou.hipFile.path()
+        hou.hipFile.save(file_name=None)
         # Test output_node
-        if not hou.node(str(self.output_node.text())):
+        if not hou.node(str(self.output_node.currentText())):
             self.error("Output node error ! please verify the node path")
         else:
-            hou.hipFile.save()
-            _renderer = hou.nodeType(str(self.output_node.text())).name().lower()
-            # new_path = self.set_env_dirmap(path)
-            use_renderer = False
-            for renderer_loop in ["redshift", "arnold", "vray"]:
-                if _renderer.startswith(renderer_loop):
-                    self.submit(path, "houdini", [renderer_loop])
-                    use_renderer = True
-                    break
-            if not use_renderer:
-                self.submit(path, "houdini")
+            # check node type
+            # if merge:
+            #    get number of connected node
+            #    add it to an array
+            # for i in array :
+            #   submit
+            self.rop_node = hou.node(self.output_node.currentText())
+            if self.rop_node.type().name() == "merge":
+                list_rop = self.rop_node.inputs()
+                for rop in list_rop:
+                    self.list_rop.append(rop.path())
+                print("merge detected. Nodes = " + str(self.list_rop))
+            else:
+                self.list_rop = [self.rop_node.path()]
+            for node in self.list_rop:
+                print("start render for node " + node)
+                self.rop_node = node
+                hou.hipFile.save()
+                _renderer = hou.node(self.rop_node).type().name().lower()
+                use_renderer = False
+                for renderer_loop in ["redshift", "arnold", "vray"]:
+                    if _renderer.startswith(renderer_loop):
+                        self.submit(path, "houdini", [renderer_loop])
+                        use_renderer = True
+                        break
+                if not use_renderer:
+                    self.submit(path, "houdini")
 
     def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
         command = [
@@ -55,7 +81,7 @@ class SubmitterHoudini(Submitter):
             "%D({file_path})".format(file_path=file_path),
             "-v",
             "-e",
-            "-d", str(self.output_node.text()),
+            "-d", self.rop_node,
         ]
         if frame_start == frame_end:
             command.extend(["-F", str(frame_start)])
@@ -64,23 +90,6 @@ class SubmitterHoudini(Submitter):
         if step != 1:
             command.extend(["-i", str(step)])
         return command
-
-    def set_dirmap(self, local_project, server_project, new_name_path, path):
-        hou.hipFile.save(file_name=None)
-        # # # # ENV # # # #
-        for var, env_job in [(v, hou.getenv(v)) for v in config.houdini_envs]:
-            if not env_job:
-                continue
-            env_job = env_job.replace(local_project, server_project)
-            hou.hscript('setenv {}={}'.format(var, env_job))
-
-        # # # # OPCHANGE # # # #
-        hou.hscript('opchange {local} {server}'.format(local=local_project, server=server_project))
-        hou.hipFile.setName(new_name_path)
-        hou.hipFile.save(file_name=None)
-        print("Save file : " + str(new_name_path))
-        hou.hipFile.load(path, suppress_save_prompt=True)
-
 
 def run():
     for x in get_houdini_window().children():

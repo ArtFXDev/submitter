@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 
 import config
 
@@ -8,6 +9,8 @@ for path in config.tractor_lib_paths:
 
 import tractor.api.author as author
 
+from submitter.frame_manager import framerange_to_frames
+
 
 class ArtFxJob(author.Job):
 
@@ -15,7 +18,7 @@ class ArtFxJob(author.Job):
         super(ArtFxJob, self).__init__(*args, **kwargs)
         self.dirmap_tractor()
 
-    def add_task(self, name, command, services, path, server_name, engine=None, plugins=None, executables=None, is_linux=False, pre_command=""):
+    def add_task(self, name, command, services, path, server_name, frames_pattern, engine=None, plugins=None, executables=None, is_linux=False, pre_command=""):
         """
         Add a task in the job
         :param str name: Name of the task
@@ -40,6 +43,8 @@ class ArtFxJob(author.Job):
             pre_cmd = author.Command(argv=pre_command)
             pre_cmd.envkey = _envkey
             task.addCommand(pre_cmd)
+        metadata = {"frames": framerange_to_frames(frames_pattern)}
+        task.metadata = json.dumps(metadata)
         task.addCommand(cmd)
         """
         # # # # # CLEAN UP # # # # #

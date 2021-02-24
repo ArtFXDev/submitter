@@ -47,45 +47,16 @@ class SubmitterMaya(Submitter):
             self.submit(path, "maya")
 
     def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
-        # We don't use preRender cause preRender is after reference load
-        # project = self.get_project()
-        # dirmap_server = "//" + project["server"] if is_linux else "//" + project["server"] + "/PFE_RN_2020/"
         command = [
             config.batcher["maya"]["render"]["linux" if is_linux else "win"],
-            "-r", "redshift" if self.renderer == "redshift" else "file",
+            "-r", "file",
             "-s", str(frame_start),
             "-e", str(frame_end),
             "-b", str(step),
-            # "-preRender", 'dirmap -en true; dirmap -m "D:/SynologyDrive/" "' + dirmap_server + '";',
             "-proj", "%D({proj})".format(proj=workspace),
             "%D({file_path})".format(file_path=file_path)
         ]
         return command
-
-    def set_dirmap(self, local_project, server_project, new_name_path, path):
-        cmds.fileInfo("licence", "education")
-        cmds.file(save=True)
-        copyfile(path, new_name_path)
-        # # # # DIRNAME # # # #
-        # Edit file in text mode is .ma else do modification and reopen the scene
-        # if path.split(".")[-1] == "ma":
-        #     print("Dirmap with text")
-        #     copyfile(path, new_name_path)
-        #     file_data = ""
-        #     with open(new_name_path, "rt") as file:
-        #         file_data = file.read()
-        #     file_data = file_data.replace(local_project, server_project)
-        #     with open(new_name_path, "wt") as file:
-        #         file.write(file_data)
-        # else:
-        # print("Dirmap open/save")
-        # for type in cmds.filePathEditor(query=True, listRegisteredTypes=True):
-        #     for node in cmds.ls(type=type):
-        #         cmds.filePathEditor(node, replaceString=(local_project, server_project), replaceField="pathOnly", replaceAll=True)
-        # cmds.file(rename=new_name_path)
-        # cmds.file(save=True)
-        # print("Save file : " + str(new_name_path))
-        # cmds.file(path, open=True, force=True)
 
 
 def run():

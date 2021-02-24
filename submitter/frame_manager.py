@@ -15,9 +15,10 @@ def framerange_to_frames_obj(input_str):
     for split in splits:
         step = 1
         if '-' in split:
+            number_range = split.split('x')[0]
             frame_object = {
-                "start": int(split.split('-')[0]),
-                "end": int(split.split('-')[1])}
+                "start": int(number_range.split('-')[0]),
+                "end": int(number_range.split('-')[1])}
         else:
             frame_object = {
                 "start": int(split.split('x')[0]),
