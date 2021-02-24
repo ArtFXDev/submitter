@@ -59,9 +59,9 @@ class Submitter(QMainWindow):
         elif self.sid.is_asset():
             farm = self.sid.get('project').upper() + '_' + self.sid.get('name')
         self.input_job_name.setText(farm)
-        items = self.list_project.findItems("work", QtCore.Qt.MatchCaseSensitive)
-        if items[0]:
-            self.list_project.setCurrentItem(items[0])
+        # items = self.list_project.findItems("work", QtCore.Qt.MatchCaseSensitive)
+        # if items[0]:
+        #     self.list_project.setCurrentItem(items[0])
         frames = self.default_frame_range()
         # range last value is exclusive so +1 needed
         str_frames = frames_to_framerange(list(range(frames[0], frames[1] + 1, frames[2])))
@@ -142,12 +142,14 @@ class Submitter(QMainWindow):
         # # # # # WORKSPACE # # # # #
         if '/scenes' not in path:
             self.error('No workspace found (/scenes)')
+            return 0
         workspace = path.split('/scenes')[0]
 
         # # # # # POOLS # # # # #
         isLinux = self.is_linux()
         if len(self.list_project.selectedItems()) < 1:
             self.error("You need to select a pool")
+            return 0
         for project in self.list_project.selectedItems():
             # Linux Rack
             if str(project.text()) == "rackLinux":
@@ -207,7 +209,8 @@ class Submitter(QMainWindow):
                     pre_command = None
                     # # # # # TASKS # # # # #
                     task_end_frame = (i + task_step - 1) if (i + task_step - 1) < end else end
-                    log.info("Task: frame {}-{}x{}".format(i, task_end_frame, step))
+                    task_frames_pattern = "{}-{}x{}".format(i, task_end_frame, step)
+                    log.info("Task: frame {}".format(task_frames_pattern))
                     task_command = self.task_command(isLinux, i, task_end_frame, step, path, workspace)
                     task_name = "frame {start}-{end}x{step}".format(start=str(i), end=str(task_end_frame), step=str(step))
                     # # # # # TASK CLEAN UP # # # # #
@@ -215,7 +218,7 @@ class Submitter(QMainWindow):
                     # if executables:
                     #     if type(executables) == str:
                     #         executables = [executables]
-                    job.add_task(task_name, task_command, services, path, self.current_project["server"], frames_pattern,
+                    job.add_task(task_name, task_command, services, path, self.current_project["server"], task_frames_pattern,
                                  engine_name, plugins, [], isLinux, pre_command)
             job.comment = str(self.current_project["name"])
             job.projects = [str(self.current_project["name"])]

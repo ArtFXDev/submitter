@@ -24,7 +24,7 @@ ui_path = path.join(path.dirname(__file__), "submitter", "qt", "submitter.ui")
 
 rams = ["All ram", "ram_32", "ram_lower"]
 
-pools = ["rackLinux", "work", "windows10", "td"]
+pools = ["rackLinux", "mk12", "mk11", "mk10", "mk9", "mk8", "mk7", "mk6_and_lower", "windows10", "td"]
 
 houdini_envs = ['JOB', 'WIPCACHE', 'PUBCACHE', 'ASSET', 'SHOT', 'PROJECT', 'IMAGES_OUT']
 
@@ -87,7 +87,7 @@ projects = [
         "name": "DIVE",
         "server": 'ana',
         "short_name": "dive",
-        "totalFrames": 1000
+        "totalFrames": 2405
     },
     {
         "name": "GREEN",
@@ -118,7 +118,7 @@ projects = [
         "name": "RELATIVITY",
         "server": 'tars',
         "short_name": "relativity",
-        "totalFrames": 1000
+        "totalFrames": 10075
     },
     {
         "name": "HOSTILE",

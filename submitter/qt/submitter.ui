@@ -721,7 +721,11 @@
         </widget>
        </item>
        <item>
-        <widget class="QListWidget" name="list_project"/>
+        <widget class="QListWidget" name="list_project">
+         <property name="selectionMode">
+          <enum>QAbstractItemView::MultiSelection</enum>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QLabel" name="label_7">
