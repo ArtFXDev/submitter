@@ -18,8 +18,8 @@ def get_houdini_window():
 
 class SubmitterHoudini(Submitter):
 
-    def __init__(self, parent=get_houdini_window()):
-        super(SubmitterHoudini, self).__init__(parent)
+    def __init__(self, parent=get_houdini_window(), sid=None):
+        super(SubmitterHoudini, self).__init__(parent, sid)
         self.output_nodes = HoudiniEngine().get_render_nodes()
         if not self.output_nodes:
             self.error("Have you render node on your scene ?")
@@ -107,11 +107,11 @@ class SubmitterHoudini(Submitter):
             command.extend(["-i", str(step)])
         return command
 
-def run():
+def run(sid=None):
     for x in get_houdini_window().children():
         if x.objectName() == "SubmitterUI":
             x.deleteLater()
-    win = SubmitterHoudini()
+    win = SubmitterHoudini(sid=sid)
     win.show()
 
 
