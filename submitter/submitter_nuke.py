@@ -16,8 +16,8 @@ def get_nuke_window():
 
 class SubmitterNuke(Submitter):
 
-    def __init__(self, parent=get_nuke_window()):
-        super(SubmitterNuke, self).__init__(parent)
+    def __init__(self, parent=get_nuke_window(), sid=None):
+        super(SubmitterNuke, self).__init__(parent, sid)
         self._rb_render_default = QRadioButton("Default")
         self._rb_render_redshift = QRadioButton("Redshift")
         self.custom_layout.addWidget(self._rb_render_default)
@@ -55,11 +55,11 @@ class SubmitterNuke(Submitter):
         nuke.scriptOpen(path)
 
 
-def run():
+def run(sid=None):
     for x in get_nuke_window().children():
         if x.objectName() == "SubmitterUI":
             x.deleteLater()
-    win = SubmitterNuke()
+    win = SubmitterNuke(sid=sid)
     win.show()
 
 

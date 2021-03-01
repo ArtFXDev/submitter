@@ -30,7 +30,6 @@ class Submitter(QMainWindow):
     """
 
     def __init__(self, parent=None, sid=None):
-        print("sid Submitter __init__ : " + str(sid))
         super(Submitter, self).__init__(parent)
         # setup ui
         QtCompat.loadUi(config.ui_path, self)
