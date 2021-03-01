@@ -18,8 +18,8 @@ def get_maya_window():
 
 class SubmitterMaya(Submitter):
 
-    def __init__(self, parent=get_maya_window()):
-        super(SubmitterMaya, self).__init__(parent)
+    def __init__(self, parent=get_maya_window(), sid=None):
+        super(SubmitterMaya, self).__init__(parent, sid)
         self._rb_render_default = QRadioButton("Default")
         self._rb_render_redshift = QRadioButton("Redshift")
         self._rb_render_default.setChecked(True)
@@ -59,11 +59,11 @@ class SubmitterMaya(Submitter):
         return command
 
 
-def run():
+def run(sid=None):
     for x in get_maya_window().children():
         if x.objectName() == "SubmitterUI":
             x.deleteLater()
-    win = SubmitterMaya()
+    win = SubmitterMaya(sid=sid)
     win.show()
 
 
