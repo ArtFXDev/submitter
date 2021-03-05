@@ -68,6 +68,8 @@ class SubmitterEngine(Submitter):
 
             with open(os.path.join(os.path.dirname(self.sid.path), ".out-nodes.json")) as json_file:
                 self.output_nodes = json.load(json_file)
+            number_layers = len([node for node in self.output_nodes.keys() if node.lower().startswith("layer")])
+            self.input_layers_number.setValue(number_layers)
             self.houdini_layout = QVBoxLayout()
             self.output_node_cb = QComboBox()
             self.output_node_cb.addItems(self.output_nodes.keys())
@@ -90,17 +92,20 @@ class SubmitterEngine(Submitter):
                         get_render_node(value)
                 else:
                     yield (node, self.output_nodes[node])
-            for node, type in get_render_node(self.rop_node):
+            for node, type in get_render_node(self.output_node_cb.currentText()):
                 use_renderer = False
                 self.rop_node = node
                 for renderer_loop in ["redshift", "arnold", "vray"]:
                     if type.startswith(renderer_loop):
-                        self.submit(path, "houdini", [renderer_loop])
+                        self.submit(path, "houdini", [renderer_loop], [node] if node.lower().startswith("layer") else [])
                         use_renderer = True
                         break
                 if not use_renderer:
-                    self.submit(path, "houdini")
+                    self.submit(path, "houdini", layers=[node] if node.lower().startswith("layer") else [])
         if self.engine_name == "maya":
+            if path.split(".")[-1] == "ma":
+                with open(path, "r"):
+                    
             if self.render_default.isChecked():
                 self.submit(path, self.engine_name)
             if self.render_arnold.isChecked():

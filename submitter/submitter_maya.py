@@ -23,10 +23,28 @@ class SubmitterMaya(Submitter):
         self._rb_render_default = QRadioButton("Default")
         self._rb_render_redshift = QRadioButton("Redshift")
         self._rb_render_default.setChecked(True)
+        self.input_layers_number.setValue(len(self.get_all_render_layer()) - 1)
         self.renderer = "maya"
 
     def get_path(self):
         return cmds.file(q=True, sceneName=True)
+
+    def get_all_render_layer(self):
+        render_layers = []
+        for layer in cmds.ls(type='renderLayer'):
+            if ":" in layer:
+                continue  # reference layer not needed
+            render_layers.append(layer)
+        return render_layers
+
+    def get_render_layer(self):
+        render_layers = []
+        for layer in cmds.ls(type='renderLayer'):
+            if ":" in layer:
+                continue  # reference layer not needed
+            if cmds.getAttr("{}.renderable".format(layer)):
+                render_layers.append(layer)
+        return render_layers
 
     def default_frame_range(self):
         start = int(cmds.getAttr("defaultRenderGlobals.startFrame"))
@@ -42,9 +60,9 @@ class SubmitterMaya(Submitter):
             cmds.setAttr("defaultRenderGlobals.imageFilePrefix", os.path.basename(path).split(".")[0], type="string")
         if self.renderer in ["redshift", "arnold", "vray"]:
             print("use {} renderer".format(self.renderer))
-            self.submit(path, "maya", [self.renderer])
+            self.submit(path, "maya", [self.renderer], self.get_render_layer())
         else:
-            self.submit(path, "maya")
+            self.submit(path, "maya", layers=self.get_render_layer())
 
     def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
         command = [
