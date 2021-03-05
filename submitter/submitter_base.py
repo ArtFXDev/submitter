@@ -120,8 +120,8 @@ class Submitter(QMainWindow):
             project_name = path.split('/')[0].upper()
         return [_proj for _proj in config.projects if str(project_name) == _proj["name"]][0] or None
 
-    def submit(self, path, engine_name, plugins=None):
-        log.info("Start submit with : path: {} | engine: {} | plugins: {}".format(path, engine_name, str(plugins)))
+    def submit(self, path, engine_name, plugins=None, layers=None):
+        log.info("Start submit with : path: {} | engine: {} | plugins: {} | layers: {}".format(path, engine_name, str(plugins), str(layers)))
         job_name = str(self.input_job_name.text())
         if not job_name:
             self.info("Job name is needed")
@@ -183,10 +183,11 @@ class Submitter(QMainWindow):
         metadata = dict()
         metadata["dcc"] = engine_name
         metadata["renderEngine"] = plugins or "default"
+        metadata["layers"] = layers or []
+        metadata["nbLayersMax"] = self.input_layers_number.value() or 1
         # metadata["frames"] = framerange_to_frames(frames_pattern)
         metadata["sendUser"] = os.getenv("COMPUTERNAME", None)
         metadata["renderState"] = "test" if self.rb_test.isChecked() else "final"
-        metadata["totalFrames"] = self.current_project["totalFrames"]
         for key in self.sid.keys:
             metadata[key] = self.sid.get(key)
         metadata["project"] = self.current_project["name"]

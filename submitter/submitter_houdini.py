@@ -28,8 +28,16 @@ class SubmitterHoudini(Submitter):
         self.output_node_cb.setEditable(True)
         self.output_node_cb.addItems(self.get_out_nodes())
         self.custom_layout.addWidget(self.output_node_cb)
+        self.input_layers_number.setValue(len(self.get_render_layer()))
         self.rop_node = None
         self.list_rop = []
+
+    def get_render_layer(self):
+        render_layers = []
+        for node in self.output_nodes.keys():
+            if "layer" in node.lower():
+                render_layers.append(node)
+        return render_layers
 
     def get_out_nodes(self):
         return self.output_nodes.keys()
@@ -67,11 +75,11 @@ class SubmitterHoudini(Submitter):
                     use_renderer = False
                     for renderer_loop in ["redshift", "arnold", "vray"]:
                         if _renderer.startswith(renderer_loop):
-                            self.submit(path, "houdini", [renderer_loop])
+                            self.submit(path, "houdini", [renderer_loop], [node] if "layer" in node.lower() else [])
                             use_renderer = True
                             break
                     if not use_renderer:
-                        self.submit(path, "houdini")
+                        self.submit(path, "houdini", layers=[node] if "layer" in node.lower() else [])
             else:
                 def get_render_node(node):
                     if isinstance(self.output_nodes[node], dict):
@@ -79,16 +87,16 @@ class SubmitterHoudini(Submitter):
                             get_render_node(value)
                     else:
                         yield (node, self.output_nodes[node])
-                for node, type in get_render_node(self.rop_node):
+                for node, type in get_render_node(self.output_node_cb.currentText()):
                     use_renderer = False
                     self.rop_node = node
                     for renderer_loop in ["redshift", "arnold", "vray"]:
                         if type.startswith(renderer_loop):
-                            self.submit(path, "houdini", [renderer_loop])
+                            self.submit(path, "houdini", [renderer_loop], [node] if node.lower().startswith("layer") else [])
                             use_renderer = True
                             break
                     if not use_renderer:
-                        self.submit(path, "houdini")
+                        self.submit(path, "houdini", layers=[node] if node.lower().startswith("layer") else [])
 
     def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
         command = [
