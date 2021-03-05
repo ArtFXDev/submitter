@@ -183,7 +183,7 @@ class Submitter(QMainWindow):
         metadata = dict()
         metadata["dcc"] = engine_name
         metadata["renderEngine"] = plugins or "default"
-        metadata["layers"] = layers or []
+        metadata["layers"] = layers or ["main"]
         metadata["nbLayersMax"] = self.input_layers_number.value() or 1
         # metadata["frames"] = framerange_to_frames(frames_pattern)
         metadata["sendUser"] = os.getenv("COMPUTERNAME", None)
