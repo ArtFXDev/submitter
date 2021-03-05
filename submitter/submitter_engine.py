@@ -103,9 +103,6 @@ class SubmitterEngine(Submitter):
                 if not use_renderer:
                     self.submit(path, "houdini", layers=[node] if node.lower().startswith("layer") else [])
         if self.engine_name == "maya":
-            if path.split(".")[-1] == "ma":
-                with open(path, "r"):
-                    
             if self.render_default.isChecked():
                 self.submit(path, self.engine_name)
             if self.render_arnold.isChecked():
