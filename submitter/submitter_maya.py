@@ -67,7 +67,7 @@ class SubmitterMaya(Submitter):
     def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
         command = [
             config.batcher["maya"]["render"]["linux" if is_linux else "win"],
-            "-r", "file",
+            "-r", self.renderer if self.renderer in ["redshift", "arnold", "vray"] else "file",
             "-s", str(frame_start),
             "-e", str(frame_end),
             "-b", str(step),
