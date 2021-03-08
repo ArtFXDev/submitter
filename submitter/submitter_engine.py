@@ -28,7 +28,7 @@ class SubmitterEngine(Submitter):
             if self.sid.get("ext") in exts:
                 self.engine_name = soft
         if self.engine_name == "engine":
-            raise Error("Ext incorrect")
+            raise NameError("Ext incorrect")
 
         if self.engine_name == "maya":
             # chose render
@@ -48,7 +48,7 @@ class SubmitterEngine(Submitter):
             self.layout_renderer.addWidget(self.render_redshift)
             self.layout_renderer.addWidget(self.render_vray)
             self.custom_layout.addLayout(self.layout_renderer)
-
+            self.renderer = "file"
         if self.engine_name == "houdini":
             self.output_nodes = {}
             cache_out_node_path = os.path.join(os.path.dirname(self.sid.path), ".out-nodes.json")
@@ -106,14 +106,14 @@ class SubmitterEngine(Submitter):
             if self.render_default.isChecked():
                 self.submit(path, self.engine_name)
             if self.render_arnold.isChecked():
-                self.submit(path, self.engine_name, ["arnold"])
-                conf.set("renderEngine", "arnold")
+                self.renderer = "arnold"
             if self.render_redshift.isChecked():
-                self.submit(path, self.engine_name, ["redshift"])
-                conf.set("renderEngine", "redshift")
+                self.renderer = "redshift"
             if self.render_vray.isChecked():
-                self.submit(path, self.engine_name, ["vray"])
-                conf.set("renderEngine", "vray")
+                self.renderer = "vray"
+            if self.renderer != "file":
+                self.submit(path, self.engine_name, [self.renderer])
+                conf.set("renderEngine", self.renderer)
         elif self.engine_name == "nuke":
             self.submit(path, "nuke")
 
