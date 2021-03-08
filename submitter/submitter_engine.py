@@ -28,7 +28,7 @@ class SubmitterEngine(Submitter):
             if self.sid.get("ext") in exts:
                 self.engine_name = soft
         if self.engine_name == "engine":
-            raise Error("Ext incorrect")
+            raise NameError("Ext incorrect")
 
         if self.engine_name == "maya":
             # chose render
@@ -48,7 +48,7 @@ class SubmitterEngine(Submitter):
             self.layout_renderer.addWidget(self.render_redshift)
             self.layout_renderer.addWidget(self.render_vray)
             self.custom_layout.addLayout(self.layout_renderer)
-
+            self.renderer = "file"
         if self.engine_name == "houdini":
             self.output_nodes = {}
             cache_out_node_path = os.path.join(os.path.dirname(self.sid.path), ".out-nodes.json")
@@ -68,6 +68,8 @@ class SubmitterEngine(Submitter):
 
             with open(os.path.join(os.path.dirname(self.sid.path), ".out-nodes.json")) as json_file:
                 self.output_nodes = json.load(json_file)
+            number_layers = len([node for node in self.output_nodes.keys() if node.lower().startswith("layer")])
+            self.input_layers_number.setValue(number_layers)
             self.houdini_layout = QVBoxLayout()
             self.output_node_cb = QComboBox()
             self.output_node_cb.addItems(self.output_nodes.keys())
@@ -90,28 +92,28 @@ class SubmitterEngine(Submitter):
                         get_render_node(value)
                 else:
                     yield (node, self.output_nodes[node])
-            for node, type in get_render_node(self.rop_node):
+            for node, type in get_render_node(self.output_node_cb.currentText()):
                 use_renderer = False
                 self.rop_node = node
                 for renderer_loop in ["redshift", "arnold", "vray"]:
                     if type.startswith(renderer_loop):
-                        self.submit(path, "houdini", [renderer_loop])
+                        self.submit(path, "houdini", [renderer_loop], [node] if node.lower().startswith("layer") else [])
                         use_renderer = True
                         break
                 if not use_renderer:
-                    self.submit(path, "houdini")
+                    self.submit(path, "houdini", layers=[node] if node.lower().startswith("layer") else [])
         if self.engine_name == "maya":
             if self.render_default.isChecked():
                 self.submit(path, self.engine_name)
             if self.render_arnold.isChecked():
-                self.submit(path, self.engine_name, ["arnold"])
-                conf.set("renderEngine", "arnold")
+                self.renderer = "arnold"
             if self.render_redshift.isChecked():
-                self.submit(path, self.engine_name, ["redshift"])
-                conf.set("renderEngine", "redshift")
+                self.renderer = "redshift"
             if self.render_vray.isChecked():
-                self.submit(path, self.engine_name, ["vray"])
-                conf.set("renderEngine", "vray")
+                self.renderer = "vray"
+            if self.renderer != "file":
+                self.submit(path, self.engine_name, [self.renderer])
+                conf.set("renderEngine", self.renderer)
         elif self.engine_name == "nuke":
             self.submit(path, "nuke")
 
