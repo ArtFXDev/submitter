@@ -98,7 +98,7 @@ class SubmitterHoudini(Submitter):
                     if not use_renderer:
                         self.submit(path, "houdini", layers=[node] if node.lower().startswith("layer") else [])
 
-    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
+    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace="", server=None):
         command = [
             config.batcher["houdini"]["hython"]["linux" if is_linux else "win"],
             config.batcher["houdini"]["hrender"]["linux" if is_linux else "win"],
