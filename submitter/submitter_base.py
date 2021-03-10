@@ -81,6 +81,8 @@ class Submitter(QMainWindow):
             self._rb_only_logs = QRadioButton("OnlyLogs")
             self.custom_layout.addWidget(self._rb_only_logs)
         self.setWindowTitle("Submitter - " + mode_str)
+        # TODO remove when renderstat can use layer information
+        self.widget_frame_per_task_2.hide()
 
     def get_sid(self):
         return None
@@ -211,7 +213,7 @@ class Submitter(QMainWindow):
                     task_end_frame = (i + task_step - 1) if (i + task_step - 1) < end else end
                     task_frames_pattern = "{}-{}x{}".format(i, task_end_frame, step)
                     log.info("Task: frame {}".format(task_frames_pattern))
-                    task_command = self.task_command(isLinux, i, task_end_frame, step, path, workspace)
+                    task_command = self.task_command(isLinux, i, task_end_frame, step, path, workspace, self.current_project["server"])
                     task_name = "frame {start}-{end}x{step}".format(start=str(i), end=str(task_end_frame), step=str(step))
                     # # # # # TASK CLEAN UP # # # # #
                     # executables = config.batcher[engine_name]["cleanup"]["linux" if isLinux else "win"]
@@ -231,7 +233,7 @@ class Submitter(QMainWindow):
         except Exception as ex:
             self.error(ex.message)
 
-    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
+    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace="", server=None):
         """
         Command for each task of the job (need to be change for each dcc)
         :param bool is_linux: Is linux ? (true = linux, false = win)
@@ -240,6 +242,7 @@ class Submitter(QMainWindow):
         :param int step: frame step
         :param str file_path: Path to the scene to render
         :param str workspace: Path to the workspace folder
+        :param str server: Server name for nuke dirmap
         :return: The command in str or list
         :rtype: str or list
         """

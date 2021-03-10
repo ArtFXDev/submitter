@@ -64,7 +64,7 @@ class SubmitterMaya(Submitter):
         else:
             self.submit(path, "maya", layers=self.get_render_layer())
 
-    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
+    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace="", server=None):
         command = [
             config.batcher["maya"]["render"]["linux" if is_linux else "win"],
             "-r", self.renderer if self.renderer in ["redshift", "arnold", "vray"] else "file",

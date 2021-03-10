@@ -77,6 +77,12 @@ class SubmitterEngine(Submitter):
             self.rop_node = None
             self.list_rop = []
             self.custom_layout.addLayout(self.houdini_layout)
+        if self.engine_name == "nuke":
+            self.rop_node = None
+            self.output_node_cb = QComboBox()
+            self.output_node_cb.setMinimumWidth(200)
+            self.output_node_cb.setEditable(True)
+            self.custom_layout.addWidget(self.output_node_cb)
 
     def default_frame_range(self):
         return (1, 10, 1)
@@ -115,9 +121,10 @@ class SubmitterEngine(Submitter):
                 self.submit(path, self.engine_name, [self.renderer])
                 conf.set("renderEngine", self.renderer)
         elif self.engine_name == "nuke":
+            self.rop_node = self.output_node_cb.currentText()
             self.submit(path, "nuke")
 
-    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
+    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace="", server=None):
         command = ""
         if self.engine_name == "maya":
             command = [
@@ -146,12 +153,12 @@ class SubmitterEngine(Submitter):
                 command.extend(["-i", str(step)])
         elif self.engine_name == "nuke":
              command = [
-                 config.batcher["nuke"]["render"]["linux" if is_linux else "win"],
-                 "-i",
-                 "-x",
-                 "%D({file_path})".format(file_path=file_path),
-                 "-F", "{start}-{end}x{step}".format(start=str(frame_start), end=str(frame_end), step=str(step)),
-             ]
+                config.batcher["nuke"]["render"]["linux" if is_linux else "win"],
+                "-X", self.rop_node,
+                "-F", "{start}-{end}x{step}".format(start=str(frame_start), end=str(frame_end), step=str(step)),
+                "-remap", "{source},%D({target})".format(source=os.getenv("ROOT_PIPE"), target="//{}/PFE_RN_2021".format(server)),
+                "%D({file_path})".format(file_path=file_path),
+            ]
         if not command:
             self.error("Command invalid")
         return command
