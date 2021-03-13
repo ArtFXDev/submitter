@@ -136,6 +136,8 @@ class SubmitterEngine(Submitter):
                 "-proj", "%D({proj})".format(proj=workspace),
                 "%D({file_path})".format(file_path=file_path)
             ]
+            if self.rb_skip_frames.isChecked():
+                command.insert(3, "-skipExistingFrames")
         elif self.engine_name == "houdini":
             command = [
                 config.batcher["houdini"]["hython"]["linux" if is_linux else "win"],
@@ -151,6 +153,8 @@ class SubmitterEngine(Submitter):
                 command.extend(["-f", str(frame_start), str(frame_end)])
             if step != 1:
                 command.extend(["-i", str(step)])
+            if self.rb_skip_frames.isChecked():
+                command.append("-S")
         elif self.engine_name == "nuke":
              command = [
                 config.batcher["nuke"]["render"]["linux" if is_linux else "win"],

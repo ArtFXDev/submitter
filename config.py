@@ -49,8 +49,8 @@ batcher = {
             "linux": "/opt/hfs18.0/bin/hython",
         },
         "hrender": {
-            "win": "C:/Houdini18/bin/hrender.py",
-            "linux": "/opt/hfs18.0/bin/hrender.py",
+            "win": "//multifct/tools/renderfarm/misc/hrender.py",
+            "linux": "//multifct/tools/renderfarm/misc/hrender.py",  # "/opt/hfs18.0/bin/hrender.py"
         },
         "cleanup": {
             "win": ["hython.exe"],
