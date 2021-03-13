@@ -113,6 +113,8 @@ class SubmitterHoudini(Submitter):
             command.extend(["-f", str(frame_start), str(frame_end)])
         if step != 1:
             command.extend(["-i", str(step)])
+        if self.rb_skip_frames.isChecked():
+            command.append("-S")
         return command
 
 def run(sid=None):
