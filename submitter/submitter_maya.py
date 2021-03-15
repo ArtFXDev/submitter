@@ -74,6 +74,8 @@ class SubmitterMaya(Submitter):
             "-proj", "%D({proj})".format(proj=workspace),
             "%D({file_path})".format(file_path=file_path)
         ]
+        if self.rb_skip_frames.isChecked():
+            command.insert(3, "-skipExistingFrames")
         return command
 
 

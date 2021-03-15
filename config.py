@@ -1,6 +1,7 @@
 """
 CONFIG FOR THE SUBMITTER
 """
+import os
 from os import path
 
 tractor_install = "C:/Program Files/Pixar/Tractor-2.3"
@@ -49,8 +50,8 @@ batcher = {
             "linux": "/opt/hfs18.0/bin/hython",
         },
         "hrender": {
-            "win": "C:/Houdini18/bin/hrender.py",
-            "linux": "/opt/hfs18.0/bin/hrender.py",
+            "win": path.join(path.dirname(__file__), "hrender.py").replace(os.sep, '/'),
+            "linux": path.join(path.dirname(__file__), "hrender.py").replace(os.sep, '/'),  # "/opt/hfs18.0/bin/hrender.py"
         },
         "cleanup": {
             "win": ["hython.exe"],
