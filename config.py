@@ -1,6 +1,7 @@
 """
 CONFIG FOR THE SUBMITTER
 """
+import os
 from os import path
 
 tractor_install = "C:/Program Files/Pixar/Tractor-2.3"
