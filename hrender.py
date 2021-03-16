@@ -85,8 +85,8 @@ def validate_args(args):
     if args.frame_range:
         if not args.e_option:
              return 'Cannot specify frame range without -e.'
-    if args.frame_range[0] > args.frame_range[1]:
-        return 'Start frame cannot be greater than end frame.'
+        if args.frame_range[0] > args.frame_range[1]:
+            return 'Start frame cannot be greater than end frame.'
 
     if args.i_option:
         if not args.e_option:
@@ -268,6 +268,7 @@ def render(args):
 
     for frame in range(*frame_range):
         print('=' * 100)
+        print("START RENDER FRAME : {}".format(str(frame)))
         output_path_frame = output_path.replace(start, str(frame).zfill(4))
         if os.path.exists(output_path_frame) and args.S_option:
             print("FRAME ALREADY EXIST : {}".format(output_path_frame))

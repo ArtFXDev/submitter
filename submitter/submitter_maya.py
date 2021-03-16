@@ -75,7 +75,7 @@ class SubmitterMaya(Submitter):
             "%D({file_path})".format(file_path=file_path)
         ]
         if self.rb_skip_frames.isChecked():
-            command.insert(3, "-skipExistingFrames")
+            command.insert(3, '-preRender "setAttr defaultRenderGlobals.sef yes"')
         return command
 
 
