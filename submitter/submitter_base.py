@@ -193,6 +193,10 @@ class Submitter(QMainWindow):
         for key in self.sid.keys:
             metadata[key] = self.sid.get(key)
         metadata["project"] = self.current_project["name"]
+        output_path = self.get_output_dir()
+        if output_path:
+            output_path = output_path.replace("D:/SynologyDrive", "//{}/PFE_RN_2021".format(self.current_project["server"]))
+        metadata["output_path"] = output_path
 
         # # # # # ENGINE CLIENT # # # # #
         set_engine_client(user=("artfx" if isLinux else "admin"))
@@ -247,6 +251,9 @@ class Submitter(QMainWindow):
         :rtype: str or list
         """
         raise NotImplementedError()
+
+    def get_output_dir(self):
+        return None
 
     def success(self):
         """
