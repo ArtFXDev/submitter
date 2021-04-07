@@ -29,6 +29,12 @@ class SubmitterMaya(Submitter):
     def get_path(self):
         return cmds.file(q=True, sceneName=True)
 
+    def get_output_dir(self):
+        image_path = cmds.renderSettings(imageGenericName=True)[0]
+        image_path = image_path.split("<")[0]
+        workspace = cmds.file(q=True, sceneName=True).split("scenes")[0]
+        return "{}images/{}".format(workspace, image_path)
+
     def get_all_render_layer(self):
         render_layers = []
         for layer in cmds.ls(type='renderLayer'):
@@ -75,7 +81,8 @@ class SubmitterMaya(Submitter):
             "%D({file_path})".format(file_path=file_path)
         ]
         if self.rb_skip_frames.isChecked():
-            command.insert(3, '-preRender "setAttr defaultRenderGlobals.sef yes"')
+            command.insert(3, "-preRender")
+            command.insert(4, "setAttr defaultRenderGlobals.sef yes")
         return command
 
 

@@ -7,7 +7,7 @@ from os import path
 tractor_install = "C:/Program Files/Pixar/Tractor-2.3"
 
 if not path.exists(tractor_install):
-    tractor_install = "//multifct/tools/pipeline/global/softwares/Tractor-2.3"
+    tractor_install = "//multifct/tools/renderfarm/softwares/Tractor-2.3"
 
 tractor_lib_paths = [
     "{root}/bin".format(root=tractor_install),
@@ -28,6 +28,14 @@ rams = ["All ram", "ram_32", "ram_lower"]
 pools = ["rackLinux", "mk12", "mk11", "mk10", "mk9", "mk8", "mk7", "mk6_and_lower", "windows10", "td"]
 
 houdini_envs = ['JOB', 'WIPCACHE', 'PUBCACHE', 'ASSET', 'SHOT', 'PROJECT', 'IMAGES_OUT']
+
+output_img_path_param = {
+    "ifd": "vm_picture",
+    "vray_renderer": "SettingsOutput_img_file_path",
+    "Redshift_ROP": "RS_outputFileNamePrefix",
+    "arnold": "ar_picture",
+    "filecache": "file",
+}
 
 batcher = {
     "maya": {
@@ -50,8 +58,8 @@ batcher = {
             "linux": "/opt/hfs18.0/bin/hython",
         },
         "hrender": {
-            "win": path.join(path.dirname(__file__), "hrender.py").replace(os.sep, '/'),
-            "linux": path.join(path.dirname(__file__), "hrender.py").replace(os.sep, '/'),  # "/opt/hfs18.0/bin/hrender.py"
+            "win": path.join(path.dirname(__file__), "render", "hrender.py").replace(os.sep, '/'),
+            "linux": path.join(path.dirname(__file__), "render", "hrender.py").replace(os.sep, '/').replace("/multifct/", "/"),  # "/opt/hfs18.0/bin/hrender.py"
         },
         "cleanup": {
             "win": ["hython.exe"],

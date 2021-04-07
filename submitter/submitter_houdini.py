@@ -98,6 +98,14 @@ class SubmitterHoudini(Submitter):
                     if not use_renderer:
                         self.submit(path, "houdini", layers=[node] if node.lower().startswith("layer") else [])
 
+    def get_output_dir(self):
+        cur_node = hou.node(self.rop_node)
+        try:
+            out_dir = os.path.dirname(hou.evalParm(cur_node.parm(config.output_img_path_param[cur_node.type().name()]).path()))
+        except Exception:
+            out_dir = None
+        return out_dir
+
     def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace="", server=None):
         command = [
             config.batcher["houdini"]["hython"]["linux" if is_linux else "win"],

@@ -12,7 +12,7 @@ from Qt.QtWidgets import QDesktopWidget
 from Qt.QtWidgets import QRadioButton
 
 import config
-from artfx_job import ArtFxJob, set_engine_client
+from artfx_job import ArtFxJob, set_engine_client, command
 from .frame_manager import framerange_to_frames_obj, frames_to_framerange, framerange_to_frames
 from pipeline.libs.engine import engine
 
@@ -138,7 +138,7 @@ class Submitter(QMainWindow):
             return 0
 
         # # # # # TMP SCENE # # # #
-        path = self.create_render_file(path)
+        path, render_path = self.create_render_file(path)
 
         # # # # # WORKSPACE # # # # #
         if '/scenes' not in path:
@@ -193,9 +193,13 @@ class Submitter(QMainWindow):
         for key in self.sid.keys:
             metadata[key] = self.sid.get(key)
         metadata["project"] = self.current_project["name"]
+        output_path = self.get_output_dir()
+        if output_path:
+            output_path = output_path.replace("D:/SynologyDrive", "//{}".format(self.current_project["server"]))
+        metadata["output_path"] = output_path
 
         # # # # # ENGINE CLIENT # # # # #
-        set_engine_client(user=("artfx" if isLinux else "admin"))
+        # set_engine_client(user=("artfx" if isLinux else "admin"))
 
         # # # # # JOB # # # # #
         job = ArtFxJob(title=job_name, priority=100, service=services)
@@ -215,16 +219,17 @@ class Submitter(QMainWindow):
                     log.info("Task: frame {}".format(task_frames_pattern))
                     task_command = self.task_command(isLinux, i, task_end_frame, step, path, workspace, self.current_project["server"])
                     task_name = "frame {start}-{end}x{step}".format(start=str(i), end=str(task_end_frame), step=str(step))
-                    # # # # # TASK CLEAN UP # # # # #
-                    # executables = config.batcher[engine_name]["cleanup"]["linux" if isLinux else "win"]
-                    # if executables:
-                    #     if type(executables) == str:
-                    #         executables = [executables]
-                    job.add_task(task_name, task_command, services, path, self.current_project["server"], task_frames_pattern,
-                                 engine_name, plugins, [], isLinux, pre_command)
+                    job.add_task(task_name, task_command, services, path, self.current_project,
+                                 task_frames_pattern, engine_name, plugins, isLinux, pre_command)
             job.comment = str(self.current_project["name"])
             job.projects = [str(self.current_project["name"])]
             job.metadata = json.dumps(metadata)
+            # # # # # JOB CLEAN UP # # # # #
+            if not isLinux:
+                job.addCleanup(command(argv='RD /S /q {}'.format(render_path), msg="Clean render scene"))
+            else:
+                job.addCleanup(command(argv="rmdir {}".format(render_path), msg="Clean render scene"))
+
             if self.isDev and self._rb_only_logs.isChecked():
                 print(job.asTcl())
             else:
@@ -247,6 +252,9 @@ class Submitter(QMainWindow):
         :rtype: str or list
         """
         raise NotImplementedError()
+
+    def get_output_dir(self):
+        return None
 
     def success(self):
         """
@@ -293,11 +301,14 @@ class Submitter(QMainWindow):
         Create a tempory render scene file to avoid scene modification
         """
         proj = self.current_project
-        isLinux = self.is_linux()
-        local_root = os.environ["ROOT_PIPE"] or "D:/SynologyDrive"
-        local_project = '{}/{}'.format(local_root, proj["name"])
-        template_server = '/{}/PFE_RN_2021/{}' if isLinux else '//{}/PFE_RN_2021/{}'
-        server_project = template_server.format(proj["server"], proj["name"])
+        # isLinux = self.is_linux()
+        # local_root = os.environ["ROOT_PIPE"] or "D:/SynologyDrive"
+        # local_project = '{}/{}'.format(local_root, proj["name"])
+        # if proj["server"] == "ana":
+        #     template_server = '/{}/PFE_RN_2021/{}' if isLinux else '//{}/PFE_RN_2021/{}'
+        # else:
+        #     template_server = '/{}/{}' if isLinux else '//{}/{}'
+        # server_project = template_server.format(proj["server"], proj["name"])
 
         # # # # TEMP FILE # # # #
         file_name = os.path.basename(path)
@@ -305,15 +316,17 @@ class Submitter(QMainWindow):
         path_split = path.split("/")
         render_path = '/'.join(path_split[:-2]) + '/render'
         # Submission on the server directly
-        # Use windows path becose only windows use submitter
-        server_project_win = '//{}/PFE_RN_2021/{}'.format(proj["server"], proj["name"])
+        # Use windows path because only windows use submitter
+        if proj["server"] == "ana":
+            server_project_win = '//{}/{}'.format(proj["server"], proj["name"])
+        else:
+            server_project_win = '//{}/PFE_RN_2021/{}'.format(proj["server"], proj["name"])
         render_path = render_path.replace('D:/SynologyDrive/{}'.format(proj["name"]), server_project_win)
         now = datetime.now()
         timestamp = now.strftime("%m-%d-%Y_%H-%M-%S")
         new_name = "{version}_{file_name}_{timestamp}.{ext}".format(version=path_split[-2], file_name=file_split[0],
                                                                           timestamp=timestamp, ext=file_split[-1])
         new_name_path = os.path.join(render_path, new_name).replace(os.sep, '/')
-        print("check if path exist : " + render_path)
         try:
             if not os.path.exists(render_path):
                 if not os.path.exists(os.path.dirname(render_path)):
@@ -327,7 +340,7 @@ class Submitter(QMainWindow):
 
         # Remap to local path for command dirmap by tractor
         new_name_path = new_name_path.replace(server_project_win, 'D:/SynologyDrive/{}'.format(proj["name"]))
-        return new_name_path
+        return new_name_path, render_path
 
 
 def run():
