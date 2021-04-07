@@ -7,7 +7,7 @@ from os import path
 tractor_install = "C:/Program Files/Pixar/Tractor-2.3"
 
 if not path.exists(tractor_install):
-    tractor_install = "//multifct/tools/pipeline/global/softwares/Tractor-2.3"
+    tractor_install = "//multifct/tools/renderfarm/softwares/Tractor-2.3"
 
 tractor_lib_paths = [
     "{root}/bin".format(root=tractor_install),
@@ -58,8 +58,8 @@ batcher = {
             "linux": "/opt/hfs18.0/bin/hython",
         },
         "hrender": {
-            "win": path.join(path.dirname(__file__), "hrender.py").replace(os.sep, '/'),
-            "linux": path.join(path.dirname(__file__), "hrender.py").replace(os.sep, '/'),  # "/opt/hfs18.0/bin/hrender.py"
+            "win": path.join(path.dirname(__file__), "render", "hrender.py").replace(os.sep, '/'),
+            "linux": path.join(path.dirname(__file__), "render", "hrender.py").replace(os.sep, '/').replace("/multifct/", "/"),  # "/opt/hfs18.0/bin/hrender.py"
         },
         "cleanup": {
             "win": ["hython.exe"],

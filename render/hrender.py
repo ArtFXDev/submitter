@@ -4,9 +4,18 @@
 Modify hrender to skip existing frames
 """
 
-import sys, os, argparse
+import os
+import sys
+import argparse
+import json
 import hou
 import config
+
+for path in config.tractor_lib_paths:
+    sys.path.append(path)
+
+import tractor.api.query as tq
+
 
 def error(msg, exit=True):
     """
@@ -46,6 +55,7 @@ options:        -w pixels       Output width
                 -v              Run in verbose mode
                 -I              Interleaved, hscript render -I
                 -S              Skip existing frames
+                -JID JID        Tractor job ID
 
 with \"-e\":	-f start end    Frame range start and end
                 -i increment    Frame increment
@@ -94,6 +104,9 @@ def validate_args(args):
         return 'Height must be greater than zero.'
     if args.i_option and args.i_option < 1:
         return 'Frame increment must be greater than zero.'
+    if args.jid_option:
+        if args.tid_option:
+            return 'You need to pass the tid option with the jid'
 
     if args.c_option:
         if args.c_option[-1] == '/':
@@ -120,6 +133,8 @@ def parse_args():
     parser.add_argument('-j', dest='threads', type=int)
     parser.add_argument('-F', dest='frame', type=float)
     parser.add_argument('-f', dest='frame_range', nargs=2, type=float)
+    parser.add_argument('-JID', dest='jid_option')
+    parser.add_argument('-TID', dest='tid_option')
 
     # .hip|.hiplc|.hipnc file
     parser.add_argument('file', nargs='*')
@@ -239,12 +254,23 @@ def render(args):
     Render with the arguments
     :param dict args: Argument options
     """
+    if not os.environ.get('ROOT_PIPE'):
+        with open("//multifct/tools/share/root_pipe_error.txt", "a") as file:
+            import socket
+            file.write(socket.gethostname() + "\n")
+        raise ValueError("ROOT_PIPE not set")
     try:
         hou.hipFile.load(args.file)
     except hou.LoadWarning as e:
         print(e)
 
     rop_node = get_output_node(args)
+
+    if args.jid_option:
+        tq.setEngineClientParam(user="root")
+        s = "jid={}".format(args.jid_option)
+        job = tq.jobs(s)[0]
+        skip_frames = []
 
     set_aspect_ratio(args, rop_node)
     set_overrides(args, rop_node)
@@ -265,6 +291,13 @@ def render(args):
         output_path_frame = output_path.replace(start, str(frame).zfill(4))
         if os.path.exists(output_path_frame) and args.S_option:
             print("FRAME ALREADY EXIST : {}".format(output_path_frame))
+            if args.jid_option:
+                metadata = json.loads(str(job['metadata']))
+
+                skip_frames.append(frame)
+                metadata["skip_frames"] = list(set(skip_frames))
+                tq.jattr(job, key="metadata", value=json.dumps(metadata))
+                print("Job metadata changed")
             continue
         rop_node.render(
             verbose=bool(args.v_option),
