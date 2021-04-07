@@ -10,6 +10,7 @@ for path in config.tractor_lib_paths:
 import tractor.api.author as author
 
 from submitter.frame_manager import framerange_to_frames
+from ocio_path import config_ocio_path, default_ocio
 
 
 class ArtFxJob(author.Job):
@@ -18,20 +19,28 @@ class ArtFxJob(author.Job):
         super(ArtFxJob, self).__init__(*args, **kwargs)
         self.dirmap_tractor()
 
-    def add_task(self, name, command, services, path, server_name, frames_pattern, engine=None, plugins=None, executables=None, is_linux=False, pre_command=""):
+    def add_task(self, name, command, services, path, project, frames_pattern, engine=None, plugins=None, is_linux=False, pre_command=""):
         """
         Add a task in the job
         :param str name: Name of the task
         :param str or list command: Command of the task
         :param str services: Services of the task
-        :param array[str] executables: Executavle te clean up after task
         :param bool is_linux: If is linux
         :param str or list pre_command: Command before the task
         """
         task = author.Task(title=name, service=services)
         cmd = author.Command(argv=command)
         # Build envkeys
-        _envkey = ["scene {} {} {}".format(path, server_name, str(is_linux))]
+        if project["server"] == "ana":
+            root_pipe = "//{}" if not is_linux else "/{}"
+        else:
+            root_pipe = "//{}/PFE_RN_2021" if not is_linux else "/{}"
+        root_pipe = root_pipe.format(project["server"])
+        ocio = config_ocio_path[project["name"]] if project["name"] in config_ocio_path.keys() else default_ocio
+        print("USING OCIO : " + str(ocio))
+        _envkey = [
+            "setenv ROOT_PIPE={} OCIO={}".format(root_pipe, ocio),
+        ]
         if engine:
             _envkey.append(engine)
             if plugins:
@@ -46,15 +55,6 @@ class ArtFxJob(author.Job):
         metadata = {"frames": framerange_to_frames(frames_pattern)}
         task.metadata = json.dumps(metadata)
         task.addCommand(cmd)
-        """
-        # # # # # CLEAN UP # # # # #
-        for executable in executables:
-            if not is_linux:
-                cmd = 'taskkill /im {exe} /F || echo process {exe} not running.'.format(exe=executable)
-                task.addCleanup(author.Command(argv=cmd, msg="Kill executable"))
-            else:
-                task.addCleanup(author.Command(argv="pkill -f {}".format(executable), msg="Kill executable"))
-        """
         self.addChild(task)
 
     def dirmap_tractor(self):
@@ -65,12 +65,18 @@ class ArtFxJob(author.Job):
 
         for project in config.projects:
             local_project = local_root + "/" + project["name"]
-            srv_project_win = "//{server}/PFE_RN_2021/{name}".format(server=project["server"], name=project["name"])
-            srv_project_linux = "/{server}/{name}".format(server=project["server"], name=project["name"])
+            if project["server"] == "ana":
+                srv_project_win = "//{server}/{name}".format(server=project["server"], name=project["name"])
+                srv_project_linux = "/{server}/{name}".format(server=project["server"], name=project["name"])
+            else:
+                srv_project_win = "//{server}/PFE_RN_2021/{name}".format(server=project["server"], name=project["name"])
+                srv_project_linux = "/{server}/{name}".format(server=project["server"], name=project["name"])
 
             self.newDirMap(src=local_project, dst=srv_project_win, zone="UNC")
             self.newDirMap(src=local_project, dst=srv_project_linux, zone="NFS")
 
+def command(*args, **kwargs):
+    return author.Command(*args, **kwargs)
 
 def set_engine_client(user):
     author.setEngineClientParam(user=user, debug=True)
