@@ -11,10 +11,11 @@ import json
 import hou
 import config
 
-for path in config.tractor_lib_paths:
-    sys.path.append(path)
-
-import tractor.api.query as tq
+# for path in config.tractor_lib_paths:
+#     print(path)
+#     sys.path.append(path)
+#
+# import tractor.api.query as tq
 
 
 def error(msg, exit=True):
@@ -266,11 +267,11 @@ def render(args):
 
     rop_node = get_output_node(args)
 
-    if args.jid_option:
-        tq.setEngineClientParam(user="root")
-        s = "jid={}".format(args.jid_option)
-        job = tq.jobs(s)[0]
-        skip_frames = []
+    # if args.jid_option:
+    #     tq.setEngineClientParam(user="root")
+    #     s = "jid={}".format(args.jid_option)
+    #     job = tq.jobs(s)[0]
+    #     skip_frames = []
 
     set_aspect_ratio(args, rop_node)
     set_overrides(args, rop_node)
@@ -285,25 +286,33 @@ def render(args):
     if rop_node.type().name() == "filecache" and not rop_node.path().endswith("/render"):
         rop_node = hou.node(rop_node.path() + "/render")
 
+    if rop_node.type().name() == "arnold":
+        rop_node.parm("ar_log_console_enable").set(True)
+        rop_node.parm("ar_log_verbosity").set("info")
+
     for frame in range(*frame_range):
         print('=' * 100)
         print("START RENDER FRAME : {}".format(str(frame)))
         output_path_frame = output_path.replace(start, str(frame).zfill(4))
         if os.path.exists(output_path_frame) and args.S_option:
             print("FRAME ALREADY EXIST : {}".format(output_path_frame))
-            if args.jid_option:
-                metadata = json.loads(str(job['metadata']))
-
-                skip_frames.append(frame)
-                metadata["skip_frames"] = list(set(skip_frames))
-                tq.jattr(job, key="metadata", value=json.dumps(metadata))
-                print("Job metadata changed")
+            #if args.jid_option:
+            #    metadata = json.loads(str(job['metadata']))
+            #
+            #    skip_frames.append(frame)
+            #    metadata["skip_frames"] = list(set(skip_frames))
+            #    tq.jattr(job, key="metadata", value=json.dumps(metadata))
+            #    print("Job metadata changed")
             continue
-        rop_node.render(
-            verbose=bool(args.v_option),
-            frame_range=(frame, frame, 1),
-            method=interleave
-        )
+        try:
+            rop_node.render(
+                verbose=bool(args.v_option),
+                frame_range=(frame, frame, 1),
+                method=interleave
+            )
+        except Exception as ex:
+            print(ex)
+            raise RuntimeError("Error found")
 
 # --------------------------------------------------------
 # Main application
