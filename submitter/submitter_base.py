@@ -38,6 +38,7 @@ class Submitter(QMainWindow):
         self.bt_open_tractor.clicked.connect(lambda: webbrowser.open("http://tractor/tv/#"))
         self.bt_help.clicked.connect(lambda: webbrowser.open("https://github.com/ArtFXDev/submitter/wiki"))
         self.bt_render.clicked.connect(self.pre_submit)
+        self.is_cancel = False
         self._engine = engine.get()
         if sid:
             self.sid = sid
@@ -195,7 +196,10 @@ class Submitter(QMainWindow):
         metadata["project"] = self.current_project["name"]
         output_path = self.get_output_dir()
         if output_path:
-            output_path = output_path.replace("D:/SynologyDrive", "//{}".format(self.current_project["server"]))
+            if self.current_project["server"] == "ana":
+                output_path = output_path.replace("D:/SynologyDrive", "//{}".format(self.current_project["server"]))
+            else:
+                output_path = output_path.replace("D:/SynologyDrive", "//{}/PFE_RN_2021".format(self.current_project["server"]))
         metadata["output_path"] = output_path
 
         # # # # # ENGINE CLIENT # # # # #
@@ -213,6 +217,8 @@ class Submitter(QMainWindow):
                 for i in range(start, end + 1, task_step):
                     # # # # # BEFORE TASK # # # #
                     pre_command = None
+                    # if not isLinux:
+                    #     pre_command = "//ana/TEST_PIPE/scripts/tractor_firewall.bat"
                     # # # # # TASKS # # # # #
                     task_end_frame = (i + task_step - 1) if (i + task_step - 1) < end else end
                     task_frames_pattern = "{}-{}x{}".format(i, task_end_frame, step)
@@ -253,6 +259,9 @@ class Submitter(QMainWindow):
         """
         raise NotImplementedError()
 
+    def check_before(self, *args):
+        raise NotImplementedError()
+
     def get_output_dir(self):
         return None
 
@@ -282,6 +291,19 @@ class Submitter(QMainWindow):
         msg.buttonClicked.connect(msg.close)
         msg.exec_()
         # raise Exception(message)
+
+    def warning(self, message):
+        """
+        warning message box
+        """
+        self.msg = QMessageBox()
+        self.msg.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
+        self.msg.setIcon(QMessageBox.Warning)
+        self.msg.setText(message)
+        self.msg.setWindowTitle("RenderFarm")
+        self.msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        self.msg.buttonClicked.connect(self.msg_close)
+        self.msg.exec_()
 
     def info(self, message):
         """
@@ -342,7 +364,14 @@ class Submitter(QMainWindow):
         new_name_path = new_name_path.replace(server_project_win, 'D:/SynologyDrive/{}'.format(proj["name"]))
         return new_name_path, render_path
 
-
+    def msg_close(self, button):
+        if button:
+            if button.text() == "Cancel":
+                self.close()
+                self.is_cancel = True
+                # raise Exception("Stop cancel")
+            else:
+                self.msg.close()
 def run():
     win = Submitter()
     win.show()

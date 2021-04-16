@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 import config
 from pipeline.libs.engine.houdini_engine import HoudiniEngine
@@ -8,9 +7,6 @@ from .submitter_base import Submitter
 import hou
 from Qt.QtWidgets import QComboBox
 
-from .frame_manager import frames_to_framerange
-
-from shutil import copyfile
 
 def get_houdini_window():
     return hou.qt.mainWindow()
@@ -51,6 +47,48 @@ class SubmitterHoudini(Submitter):
         step = 1
         return (start, end, step)
 
+    def check_before(self, _node):
+        node = hou.node(_node)
+        cam = node.evalParm(config.camera_param[node.type().name()])
+        if not cam or not hou.node(cam):
+            self.error("You cam is not valid : {}".format(node.path()))
+            self.is_cancel = True
+        elif cam == "/obj/cam1":
+            self.warning("You use a default camera : {}".format(node.path()))
+        # Check missing resources
+        missing_abc = []
+        missing_filecache = []
+        for filecache in hou.nodeType(hou.nodeTypeCategories()["Sop"], "filecache").instances():
+            if filecache.evalParm('loadfromdisk') != 1:
+                continue
+            if filecache.evalParm('trange') == 0:
+                # One frame
+                path = filecache.evalParm('file').replace(os.sep, '/').replace('D:/SynologyDrive', '//ana')
+                if not os.path.exists(path):
+                    missing_filecache.append(filecache)
+            else:
+                start, end, incr = filecache.evalParmTuple('f')
+                path = filecache.evalParm('file').replace(os.sep, '/').replace('D:/SynologyDrive', '//ana')
+                for frame in range(int(start), int(end) + 1, int(incr)):
+                    if not os.path.exists(path.replace(str(int(hou.frame())), str(frame).zfill(3))):
+                        print("Missing : " + path.replace(str(int(hou.frame())), str(frame).zfill(3)))
+                        missing_filecache.append(filecache)
+                        break
+        for alembic in hou.nodeType(hou.nodeTypeCategories()['Sop'], 'alembic').instances():
+            path = alembic.evalParm('fileName').replace(os.sep, '/').replace('D:/SynologyDrive', '//ana')
+            if not os.path.exists(path):
+                missing_abc.append(alembic)
+        if missing_abc:
+            message = "You have missing alembic file. Please check the nodes : \n"
+            for abc in missing_abc:
+                message += abc.path() + "\n"
+            self.warning(message)
+        if missing_filecache:
+            message = "You have missing cache file. Please check the nodes : \n"
+            for cache in missing_filecache:
+                message += cache.path() + "\n"
+            self.warning(message)
+
     def pre_submit(self):
         path = hou.hipFile.path()
         hou.hipFile.save(file_name=None)
@@ -68,6 +106,9 @@ class SubmitterHoudini(Submitter):
                 else:
                     self.list_rop = [self.rop_node.path()]
                 for node in self.list_rop:
+                    self.check_before(node)
+                    if self.is_cancel:
+                        continue
                     print("start render for node " + node)
                     self.rop_node = node
                     hou.hipFile.save()
@@ -88,6 +129,9 @@ class SubmitterHoudini(Submitter):
                     else:
                         yield (node, self.output_nodes[node])
                 for node, type in get_render_node(self.output_node_cb.currentText()):
+                    self.check_before(node)
+                    if self.is_cancel:
+                        continue
                     use_renderer = False
                     self.rop_node = node
                     for renderer_loop in ["redshift", "arnold", "vray"]:

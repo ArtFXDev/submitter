@@ -29,6 +29,35 @@ class SubmitterMaya(Submitter):
     def get_path(self):
         return cmds.file(q=True, sceneName=True)
 
+    def check_before(self, *args):
+        """
+        Check before submit
+        If not in single frame/cams/output
+        """
+        # Force output type : name.####.ext
+        cmds.setAttr('defaultRenderGlobals.outFormatControl', 0)
+        cmds.setAttr('defaultRenderGlobals.animation', 1)
+        cmds.setAttr('defaultRenderGlobals.putFrameBeforeExt', 1)
+        cmds.setAttr('defaultRenderGlobals.extensionPadding', 4)
+        cmds.setAttr('defaultRenderGlobals.periodInExt', 1)
+        # Check camera
+        cameras = cmds.ls(type=('camera'))
+        renderable_cameras = [camera for camera in cameras if cmds.getAttr(camera + ".renderable")]
+        startup_cameras = [camera for camera in cameras if cmds.camera(cmds.listRelatives(camera, parent=True)[0], startupCamera=True, q=True)]
+        if len(renderable_cameras) > 1:
+            self.warning("Multiple camera")
+        for cam in renderable_cameras:
+            if cam in startup_cameras:
+                self.warning("default cam")
+        # Filenameprefix
+        cur_fileprefix = cmds.getAttr('defaultRenderGlobals.imageFilePrefix')
+        filename = cmds.file(q=True, sn=True, shn=True).split('.')[0]
+        if not cur_fileprefix:
+            cur_fileprefix = filename + '/' + filename
+        elif "<Scene>" in cur_fileprefix:
+            cur_fileprefix = cur_fileprefix.replace('<Scene>', filename)
+        cmds.setAttr('defaultRenderGlobals.imageFilePrefix', cur_fileprefix, type="string")
+
     def get_output_dir(self):
         image_path = cmds.renderSettings(imageGenericName=True)[0]
         image_path = image_path.split("<")[0]
@@ -60,6 +89,9 @@ class SubmitterMaya(Submitter):
 
     def pre_submit(self):
         path = cmds.file(q=True, sceneName=True)
+        self.check_before()
+        if self.is_cancel:
+            return
         cmds.file(save=True)
         self.renderer = cmds.getAttr("defaultRenderGlobals.currentRenderer")
         if not cmds.getAttr("defaultRenderGlobals.imageFilePrefix"):
