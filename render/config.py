@@ -42,11 +42,18 @@ output_img_path_param = {
     "arnold": "ar_picture",
     "filecache": "file",
 }
-camera_param = {
-    'ifd': 'camera',
-    'arnold': 'camera',
-    'Redshift_ROP': 'RS_renderCamera',
-    'vray_renderer': 'render_camera'
+log_node_checkbox = {
+    "arnold": "ar_log_console_enable"
+}
+# warnings
+# info
+# detailed
+# debug
+log_node_param = {
+    "vray_renderer": "SettingsOutput_img_file_path",
+    "Redshift_ROP": "RS_outputFileNamePrefix",
+    "arnold": "ar_log_verbosity",
+    "filecache": "file",
 }
 
 batcher = {
@@ -70,9 +77,8 @@ batcher = {
             "linux": "/opt/hfs18.0/bin/hython",
         },
         "hrender": {
-            "win": "//ana/TEST_PIPE/scripts/hrender.py",
-            # "win": path.join(path.dirname(__file__), "render", "hrender.py").replace(os.sep, '/'),
-            "linux": path.join(path.dirname(__file__), "render", "hrender.py").replace(os.sep, '/').replace("//multifct/", "/"),  # "/opt/hfs18.0/bin/hrender.py"
+            "win": path.join(path.dirname(__file__), "render", "hrender.py").replace(os.sep, '/'),
+            "linux": path.join(path.dirname(__file__), "render", "hrender.py").replace(os.sep, '/').replace("/multifct/", "/"),  # "/opt/hfs18.0/bin/hrender.py"
         },
         "cleanup": {
             "win": ["hython.exe"],

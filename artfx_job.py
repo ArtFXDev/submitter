@@ -37,15 +37,21 @@ class ArtFxJob(author.Job):
             root_pipe = "//{}/PFE_RN_2021" if not is_linux else "/{}"
         root_pipe = root_pipe.format(project["server"])
         ocio = config_ocio_path[project["name"]] if project["name"] in config_ocio_path.keys() else default_ocio
-        print("USING OCIO : " + str(ocio))
+        ocio = ocio.replace("/PFE_RN_2021", "")[1:] if is_linux else ocio
         _envkey = [
             "setenv ROOT_PIPE={} OCIO={}".format(root_pipe, ocio),
         ]
         if engine:
+            if engine == "houdini":
+                import hou
+                _envkey.append('setenv JOB={}'.format(hou.getenv("JOB").replace("D:/SynologyDrive", root_pipe)))
             _envkey.append(engine)
             if plugins:
                 for plugin in plugins:
                     _envkey.append("{}-{}".format(engine, plugin))
+                    if plugin == "arnold":
+                        _envkey.append('setenv ARNOLD_PATHMAP={}/03_WORK_PIPE/04_TOOLS/02_FARM/path_mapping.json'.format(root_pipe + "/" + project["name"]))
+                # _envkey.append('setenv HOUDINI_PATHMAP=\"{ "D:/SynologyDrive": "{' + root_pipe + '}" }\"')
         cmd.envkey = _envkey
         # Pre command
         if pre_command:
