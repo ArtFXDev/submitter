@@ -217,13 +217,13 @@ class Submitter(QMainWindow):
                 for i in range(start, end + 1, task_step):
                     # # # # # BEFORE TASK # # # #
                     pre_command = None
-                    # if not isLinux:
-                    #     pre_command = "//ana/TEST_PIPE/scripts/tractor_firewall.bat"
+                    if not isLinux:
+                        pre_command = "cmd /c //multifct/tools/renderfarm/scripts/tractor_firewall.bat"
                     # # # # # TASKS # # # # #
                     task_end_frame = (i + task_step - 1) if (i + task_step - 1) < end else end
                     task_frames_pattern = "{}-{}x{}".format(i, task_end_frame, step)
                     log.info("Task: frame {}".format(task_frames_pattern))
-                    task_command = self.task_command(isLinux, i, task_end_frame, step, path, workspace, self.current_project["server"])
+                    task_command = self.task_command(isLinux, i, task_end_frame, step, path, workspace)
                     task_name = "frame {start}-{end}x{step}".format(start=str(i), end=str(task_end_frame), step=str(step))
                     job.add_task(task_name, task_command, services, path, self.current_project,
                                  task_frames_pattern, engine_name, plugins, isLinux, pre_command)
@@ -244,7 +244,7 @@ class Submitter(QMainWindow):
         except Exception as ex:
             self.error(ex.message)
 
-    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace="", server=None):
+    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
         """
         Command for each task of the job (need to be change for each dcc)
         :param bool is_linux: Is linux ? (true = linux, false = win)

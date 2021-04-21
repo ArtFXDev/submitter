@@ -35,6 +35,9 @@ pools = ["rackLinux", "mk12", "mk11", "mk10", "mk9", "mk8", "mk7", "mk6_and_lowe
 
 houdini_envs = ['JOB', 'WIPCACHE', 'PUBCACHE', 'ASSET', 'SHOT', 'PROJECT', 'IMAGES_OUT']
 
+output_server_win = r'//drovia'
+output_server_lin = r'/drovia'
+
 output_img_path_param = {
     "ifd": "vm_picture",
     "vray_renderer": "SettingsOutput_img_file_path",

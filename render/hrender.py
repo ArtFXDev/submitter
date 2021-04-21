@@ -53,6 +53,7 @@ options:        -w pixels       Output width
                 -b fraction     Image processing fraction (0.01 to 1.0)
                 -t take		    Render a specified take
                 -o output       Output name specification
+                -os             Change output name to server
                 -v              Run in verbose mode
                 -I              Interleaved, hscript render -I
                 -S              Skip existing frames
@@ -130,6 +131,7 @@ def parse_args():
     parser.add_argument('-i', dest='i_option', type=int)
     parser.add_argument('-t', dest='t_option')
     parser.add_argument('-o', dest='o_option')
+    parser.add_argument('-os', dest='os_option')
     parser.add_argument('-b', dest='b_option', type=float)
     parser.add_argument('-j', dest='threads', type=int)
     parser.add_argument('-F', dest='frame', type=float)
@@ -221,6 +223,13 @@ def set_overrides(args, rop_node):
             rop_node.parm('copoutput').set(args.o_option)
         else:
             rop_node.parm(config.output_img_path_param[rop_node.type().name()]).set(args.o_option)
+    if args.os_option:
+        if args.c_option:
+            rop_node.parm('copoutput').set(args.o_option)
+        else:
+            out = rop_node.parm(config.output_img_path_param[rop_node.type().name()]).rawValue()
+            out.split()
+            rop_node.parm(config.output_img_path_param[rop_node.type().name()]).set(args.os_option)
     # Add image processing fraction.
     if args.b_option:
         rop_node.parm('fraction').set(args.b_option)
@@ -305,8 +314,9 @@ def render(args):
             #    print("Job metadata changed")
             continue
         try:
+            # verbose=bool(args.v_option)
             rop_node.render(
-                verbose=bool(args.v_option),
+                verbose=True,
                 frame_range=(frame, frame, 1),
                 method=interleave
             )

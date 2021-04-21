@@ -55,6 +55,9 @@ class SubmitterHoudini(Submitter):
             self.is_cancel = True
         elif cam == "/obj/cam1":
             self.warning("You use a default camera : {}".format(node.path()))
+        # Check out path
+        if "$JOB" in node.parm(config.output_img_path_param[node.type().name()]).rawValue():
+            self.warning("You may use $OUT instead of $JOB ! \n{}".format(node.path()))
         # Check missing resources
         missing_abc = []
         missing_filecache = []
@@ -146,17 +149,26 @@ class SubmitterHoudini(Submitter):
         cur_node = hou.node(self.rop_node)
         try:
             out_dir = os.path.dirname(hou.evalParm(cur_node.parm(config.output_img_path_param[cur_node.type().name()]).path()))
+            out_dir = out_dir.replace(os.getenv('ROOT_PIPE'), config.output_server_win)
         except Exception:
             out_dir = None
         return out_dir
 
-    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace="", server=None):
+    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
+        node = hou.node(self.rop_node)
+        cur_path = node.parm(config.output_img_path_param[node.type().name()]).rawValue()
+        if self.current_project['name'] in cur_path:
+            out_path = config.output_server_lin if is_linux else config.output_server_win
+            out_path += '/{}'.format(self.current_project['name'])
+            cur_path = out_path + cur_path.split(self.current_project['name'])[1]
+
         command = [
             config.batcher["houdini"]["hython"]["linux" if is_linux else "win"],
             config.batcher["houdini"]["hrender"]["linux" if is_linux else "win"],
             "%D({file_path})".format(file_path=file_path),
             "-v",
             "-e",
+            "-o", cur_path,
             "-d", self.rop_node,
         ]
         if frame_start == frame_end:
