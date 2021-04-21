@@ -41,10 +41,12 @@ class ArtFxJob(author.Job):
         _envkey = [
             "setenv ROOT_PIPE={} OCIO={}".format(root_pipe, ocio),
         ]
+        if project["name"] == "BACKSTAGE":
+            _envkey.append('setenv ARNOLD_PLUGIN_PATH=//tars/PFE_RN_2021/BACKSTAGE/03_WORK_PIPE/01_ASSET_3D/04_sets/empire_state_building/3d/Scripts')
         if engine:
             if engine == "houdini":
                 import hou
-                _envkey.append('setenv JOB={}'.format(hou.getenv("JOB").replace("D:/SynologyDrive", root_pipe)))
+                _envkey.append('setenv OUT={}'.format(hou.getenv("OUT").replace(config.output_server_win, config.output_server_lin) if is_linux else hou.getenv("OUT")))
             _envkey.append(engine)
             if plugins:
                 for plugin in plugins:
