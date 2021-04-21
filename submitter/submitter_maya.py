@@ -41,15 +41,15 @@ class SubmitterMaya(Submitter):
         cmds.setAttr('defaultRenderGlobals.extensionPadding', 4)
         cmds.setAttr('defaultRenderGlobals.periodInExt', 1)
         # Check camera
-        cameras = cmds.ls(type=('camera'))
+        cameras = cmds.ls(type=('camera'), l=True)
         renderable_cameras = [camera for camera in cameras if cmds.getAttr(camera + ".renderable")]
-        startup_cameras = [camera for camera in cameras if cmds.camera(cmds.listRelatives(camera, parent=True)[0], startupCamera=True, q=True)]
+        startup_cameras = [camera for camera in cameras if cmds.camera(cmds.listRelatives(camera, parent=True, f=True)[0], startupCamera=True, q=True)]
         if len(renderable_cameras) > 1:
-            self.warning("Multiple camera")
+            self.warning("You have multiple cameras")
         for cam in renderable_cameras:
             if cam in startup_cameras:
-                self.warning("default cam")
-        # Filenameprefix
+                self.warning("Are you sure to render a default cam ({})".format(cam))
+        # Filename prefix
         cur_fileprefix = cmds.getAttr('defaultRenderGlobals.imageFilePrefix')
         filename = cmds.file(q=True, sn=True, shn=True).split('.')[0]
         if not cur_fileprefix:
@@ -62,6 +62,7 @@ class SubmitterMaya(Submitter):
         image_path = cmds.renderSettings(imageGenericName=True)[0]
         image_path = image_path.split("<")[0]
         workspace = cmds.file(q=True, sceneName=True).split("scenes")[0]
+        workspace = workspace.replace(os.getenv('ROOT_PIPE'), config.output_server_win)
         return "{}images/{}".format(workspace, image_path)
 
     def get_all_render_layer(self):
@@ -102,7 +103,9 @@ class SubmitterMaya(Submitter):
         else:
             self.submit(path, "maya", layers=self.get_render_layer())
 
-    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace="", server=None):
+    def task_command(self, is_linux, frame_start, frame_end, step, file_path, workspace=""):
+        out_path = config.output_server_lin if is_linux else config.output_server_win
+        out_path = workspace.replace(os.getenv('ROOT_PIPE'), out_path) + "/images/"
         command = [
             config.batcher["maya"]["render"]["linux" if is_linux else "win"],
             "-r", self.renderer if self.renderer in ["redshift", "arnold", "vray"] else "file",
@@ -110,6 +113,7 @@ class SubmitterMaya(Submitter):
             "-e", str(frame_end),
             "-b", str(step),
             "-proj", "%D({proj})".format(proj=workspace),
+            "-rd", out_path,
             "%D({file_path})".format(file_path=file_path)
         ]
         if self.rb_skip_frames.isChecked():
