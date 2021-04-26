@@ -223,13 +223,21 @@ def set_overrides(args, rop_node):
             rop_node.parm('copoutput').set(args.o_option)
         else:
             rop_node.parm(config.output_img_path_param[rop_node.type().name()]).set(args.o_option)
-    if args.os_option:
-        if args.c_option:
-            rop_node.parm('copoutput').set(args.o_option)
-        else:
-            out = rop_node.parm(config.output_img_path_param[rop_node.type().name()]).rawValue()
-            out.split()
-            rop_node.parm(config.output_img_path_param[rop_node.type().name()]).set(args.os_option)
+
+            if rop_node.type().name() == "arnold":
+                for i in range(1, int(rop_node.evalParm('ar_aovs')) + 1, 1):
+                    if not rop_node.evalParm('ar_enable_aov{}'.format(i)):
+                        continue
+                    if not rop_node.evalParm('ar_aov_separate{}'.format(i)):
+                        continue
+                    # cur_aov_path = rop_node.parm('ar_aov_separate_file{}'.format(i))
+                    # out_path = config.output_server_lin if is_linux else config.output_server_win
+                    # if "D:/SynologyDrive" in out_path:
+                    #     cur_aov_path = out_path + cur_aov_path.split("D:/SynologyDrive")[1]
+                    # if "//ana" in out_path:
+                    #     cur_aov_path = out_path + cur_aov_path.split("//ana")[1]
+                    # rop_node.parm('ar_aov_separate_file{}'.format(i)).set(cur_aov_path)
+                    # print(rop_node.evalParm('ar_aov_separate_file{}'.format(i)))
     # Add image processing fraction.
     if args.b_option:
         rop_node.parm('fraction').set(args.b_option)
@@ -305,7 +313,7 @@ def render(args):
         output_path_frame = output_path.replace(start, str(frame).zfill(4))
         if os.path.exists(output_path_frame) and args.S_option:
             print("FRAME ALREADY EXIST : {}".format(output_path_frame))
-            #if args.jid_option:
+            # if args.jid_option:
             #    metadata = json.loads(str(job['metadata']))
             #
             #    skip_frames.append(frame)

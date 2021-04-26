@@ -31,7 +31,7 @@ ui_path = path.join(path.dirname(__file__), "submitter", "qt", "submitter.ui")
 
 rams = ["All ram", "ram_32", "ram_lower"]
 
-pools = ["rackLinux", "mk12", "mk11", "mk10", "mk9", "mk8", "mk7", "mk6_and_lower", "windows10", "td"]
+pools = ["rackLinux", "rackWindows", "mk12", "mk11", "mk10", "mk9", "mk8", "mk7", "mk6_and_lower", "windows10", "td"]
 
 houdini_envs = ['JOB', 'WIPCACHE', 'PUBCACHE', 'ASSET', 'SHOT', 'PROJECT', 'IMAGES_OUT']
 
@@ -74,8 +74,9 @@ batcher = {
         },
         "hrender": {
             "win": "//ana/TEST_PIPE/scripts/hrender.py",
+            "linux": "/drovia/RENDERFARM/scripts/hrender.py"
             # "win": path.join(path.dirname(__file__), "render", "hrender.py").replace(os.sep, '/'),
-            "linux": path.join(path.dirname(__file__), "render", "hrender.py").replace(os.sep, '/').replace("//multifct/", "/"),  # "/opt/hfs18.0/bin/hrender.py"
+            # "linux": path.join(path.dirname(__file__), "render", "hrender.py").replace(os.sep, '/').replace("//multifct/", "/"),  # "/opt/hfs18.0/bin/hrender.py"
         },
         "cleanup": {
             "win": ["hython.exe"],
