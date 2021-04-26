@@ -46,7 +46,13 @@ class ArtFxJob(author.Job):
         if engine:
             if engine == "houdini":
                 import hou
-                _envkey.append('setenv OUT={}'.format(hou.getenv("OUT").replace(config.output_server_win, config.output_server_lin) if is_linux else hou.getenv("OUT")))
+                _envkey.append('setenv JOB={}'.format(hou.getenv("JOB").replace("D:/SynologyDrive", root_pipe)))
+                if hou.getenv("OUT"):
+                    _envkey.append('setenv OUT={}'.format(hou.getenv("OUT").replace(config.output_server_win, config.output_server_lin) if is_linux else hou.getenv("OUT")))
+                else:
+                    workspace_path = hou.hipFile.path().split('/scenes')[0]
+                    out_workspace = workspace_path.replace(os.getenv('ROOT_PIPE'), '//drovia') + '/images'
+                    _envkey.append('setenv OUT={}'.format(out_workspace.replace(config.output_server_win, config.output_server_lin) if is_linux else out_workspace))
             _envkey.append(engine)
             if plugins:
                 for plugin in plugins:

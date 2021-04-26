@@ -182,6 +182,10 @@ class Submitter(QMainWindow):
             services = "td"
         print("Render on : " + services)
 
+        # # # # # PRIORITY # # # # #
+        prio = int(self.input_prio.value())
+        print("With priority : {}".format(str(prio)))
+
         # # # # # METADATA # # # #
         metadata = dict()
         metadata["dcc"] = engine_name
@@ -201,6 +205,7 @@ class Submitter(QMainWindow):
             else:
                 output_path = output_path.replace("D:/SynologyDrive", "//{}/PFE_RN_2021".format(self.current_project["server"]))
         metadata["output_path"] = output_path
+        metadata["priority"] = prio
 
         # # # # # ENGINE CLIENT # # # # #
         # set_engine_client(user=("artfx" if isLinux else "admin"))
@@ -217,8 +222,8 @@ class Submitter(QMainWindow):
                 for i in range(start, end + 1, task_step):
                     # # # # # BEFORE TASK # # # #
                     pre_command = None
-                    if not isLinux:
-                        pre_command = "cmd /c //multifct/tools/renderfarm/scripts/tractor_firewall.bat"
+                    # if not isLinux:
+                    #     pre_command = "cmd /c //multifct/tools/renderfarm/scripts/tractor_firewall.bat"
                     # # # # # TASKS # # # # #
                     task_end_frame = (i + task_step - 1) if (i + task_step - 1) < end else end
                     task_frames_pattern = "{}-{}x{}".format(i, task_end_frame, step)
@@ -230,6 +235,7 @@ class Submitter(QMainWindow):
             job.comment = str(self.current_project["name"])
             job.projects = [str(self.current_project["name"])]
             job.metadata = json.dumps(metadata)
+            job.priority = prio
             # # # # # JOB CLEAN UP # # # # #
             if not isLinux:
                 job.addCleanup(command(argv='RD /S /q {}'.format(render_path), msg="Clean render scene"))

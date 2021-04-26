@@ -49,12 +49,13 @@ class SubmitterHoudini(Submitter):
 
     def check_before(self, _node):
         node = hou.node(_node)
-        cam = node.evalParm(config.camera_param[node.type().name()])
-        if not cam or not hou.node(cam):
-            self.error("You cam is not valid : {}".format(node.path()))
-            self.is_cancel = True
-        elif cam == "/obj/cam1":
-            self.warning("You use a default camera : {}".format(node.path()))
+        if node.type().name() in config.camera_param.keys():
+            cam = node.evalParm(config.camera_param[node.type().name()])
+            if not cam or not hou.node(cam):
+                self.error("You cam is not valid : {}".format(node.path()))
+                self.is_cancel = True
+            elif cam == "/obj/cam1":
+                self.warning("You use a default camera : {}".format(node.path()))
         # Check out path
         if "$JOB" in node.parm(config.output_img_path_param[node.type().name()]).rawValue():
             self.warning("You may use $OUT instead of $JOB ! \n{}".format(node.path()))
